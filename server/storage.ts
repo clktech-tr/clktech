@@ -62,6 +62,7 @@ export class MemStorage implements IStorage {
       {
         id: this.currentProductId++,
         name: "LineX Controller",
+        slug: "linex-controller",
         description: "Advanced line-following robot controller with integrated sensors and motor drivers",
         fullDescription: "Advanced line-following robot controller with integrated sensors and motor drivers. Perfect for educational projects and competitive robotics. Includes built-in WiFi connectivity and real-time debugging capabilities.",
         price: "89.99",
@@ -76,12 +77,18 @@ export class MemStorage implements IStorage {
           digital_io: "20 pins",
           analog_inputs: "8 channels"
         }),
+        externalLinks: JSON.stringify({
+          "Etsy": "https://www.etsy.com/listing/linex-controller",
+          "N11": "https://www.n11.com/product/linex-controller",
+          "Trendyol": "https://www.trendyol.com/product/linex-controller"
+        }),
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: this.currentProductId++,
         name: "MazeX Controller",
+        slug: "mazex-controller",
         description: "Maze-solving robot platform with advanced navigation algorithms and sensor arrays",
         fullDescription: "Maze-solving robot platform with advanced navigation algorithms and sensor arrays. Features intelligent pathfinding, obstacle detection, and autonomous navigation capabilities.",
         price: "129.99",
@@ -96,12 +103,18 @@ export class MemStorage implements IStorage {
           digital_io: "24 pins",
           analog_inputs: "12 channels"
         }),
+        externalLinks: JSON.stringify({
+          "Etsy": "https://www.etsy.com/listing/mazex-controller",
+          "N11": "https://www.n11.com/product/mazex-controller",
+          "Trendyol": "https://www.trendyol.com/product/mazex-controller"
+        }),
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: this.currentProductId++,
         name: "VivianX Controller",
+        slug: "vivianx-controller",
         description: "Professional-grade robotics platform with wireless connectivity and advanced I/O",
         fullDescription: "Professional-grade robotics platform with wireless connectivity and advanced I/O. Designed for complex robotics projects with real-time control and monitoring capabilities.",
         price: "199.99",
@@ -115,6 +128,11 @@ export class MemStorage implements IStorage {
           voltage: "3.3V - 5V",
           digital_io: "32 pins",
           analog_inputs: "16 channels"
+        }),
+        externalLinks: JSON.stringify({
+          "Etsy": "https://www.etsy.com/listing/vivianx-controller",
+          "N11": "https://www.n11.com/product/vivianx-controller",
+          "Trendyol": "https://www.trendyol.com/product/vivianx-controller"
         }),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -163,8 +181,10 @@ export class MemStorage implements IStorage {
     const newProduct: Product = {
       ...product,
       id,
+      slug: product.slug || product.name.toLowerCase().replace(/\s+/g, '-'),
       inStock: product.inStock ?? true,
       specs: product.specs ?? null,
+      externalLinks: product.externalLinks ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

@@ -113,25 +113,16 @@ export default function CodingApp() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 opacity-20"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Play className="w-10 h-10" />
-                  </div>
-                  <h4 className="text-xl font-semibold mb-2">Getting Started with CLK Block Code</h4>
-                  <p className="text-sm opacity-75">Learn the basics of visual programming</p>
-                </div>
-              </div>
-              {/* Replace with actual YouTube embed */}
+            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
               <iframe
+                width="100%"
+                height="100%"
                 src="https://www.youtube.com/embed/dQw4w9WgXcQ"
                 title="CLK Block Code Tutorial"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="w-full h-full opacity-0"
+                className="w-full h-full"
               ></iframe>
             </div>
           </CardContent>

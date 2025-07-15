@@ -12,20 +12,60 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { z } from "zod";
+import { useState, useEffect } from "react";
 
-type ContactFormData = z.infer<typeof insertContactSchema>;
+// Extended schema to include CAPTCHA validation
+const contactFormSchema = insertContactSchema.extend({
+  captchaAnswer: z.number().int().positive(),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export default function Contact() {
   const { toast } = useToast();
+  const [captchaQuestion, setCaptchaQuestion] = useState({ question: "", answer: 0 });
+
+  // Generate random math question for CAPTCHA
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const operations = ['+', '-', '*'];
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+    
+    let answer = 0;
+    let question = "";
+    
+    switch (operation) {
+      case '+':
+        answer = num1 + num2;
+        question = `${num1} + ${num2}`;
+        break;
+      case '-':
+        answer = num1 - num2;
+        question = `${num1} - ${num2}`;
+        break;
+      case '*':
+        answer = num1 * num2;
+        question = `${num1} × ${num2}`;
+        break;
+    }
+    
+    setCaptchaQuestion({ question, answer });
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const form = useForm<ContactFormData>({
-    resolver: zodResolver(insertContactSchema),
+    resolver: zodResolver(contactFormSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       subject: "",
       message: "",
+      captchaAnswer: 0,
     },
   });
 
@@ -40,6 +80,7 @@ export default function Contact() {
         description: "We'll get back to you as soon as possible.",
       });
       form.reset();
+      generateCaptcha(); // Generate new CAPTCHA after successful submission
     },
     onError: () => {
       toast({
@@ -51,6 +92,16 @@ export default function Contact() {
   });
 
   const onSubmit = (data: ContactFormData) => {
+    // Validate CAPTCHA answer
+    if (data.captchaAnswer !== captchaQuestion.answer) {
+      form.setError("captchaAnswer", {
+        type: "manual",
+        message: "Incorrect answer. Please try again.",
+      });
+      generateCaptcha();
+      return;
+    }
+    
     contactMutation.mutate(data);
   };
 
@@ -152,6 +203,35 @@ export default function Contact() {
                   {form.formState.errors.message && (
                     <p className="text-red-500 text-sm mt-1">
                       {form.formState.errors.message.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Math CAPTCHA */}
+                <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+                  <Label htmlFor="captchaAnswer" className="text-sm font-medium">
+                    Security Check: What is {captchaQuestion.question}?
+                  </Label>
+                  <div className="flex items-center gap-3 mt-2">
+                    <Input
+                      id="captchaAnswer"
+                      type="number"
+                      {...form.register("captchaAnswer", { valueAsNumber: true })}
+                      placeholder="Enter your answer"
+                      className="w-32"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={generateCaptcha}
+                      className="text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      New Question
+                    </Button>
+                  </div>
+                  {form.formState.errors.captchaAnswer && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {form.formState.errors.captchaAnswer.message}
                     </p>
                   )}
                 </div>

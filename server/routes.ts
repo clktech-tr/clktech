@@ -70,11 +70,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single product
-  app.get("/api/products/:id", async (req: Request, res: Response) => {
+  // Get single product by ID or slug
+  app.get("/api/products/:identifier", async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id);
-      const product = await storage.getProduct(id);
+      const identifier = req.params.identifier;
+      let product;
+      
+      // Try to get by ID first
+      const id = parseInt(identifier);
+      if (!isNaN(id)) {
+        product = await storage.getProduct(id);
+      }
+      
+      // If not found by ID, try to get by slug
+      if (!product) {
+        const products = await storage.getProducts();
+        product = products.find(p => p.slug === identifier);
+      }
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });

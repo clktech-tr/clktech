@@ -50,6 +50,7 @@ export default function ProductDetail() {
   }
 
   const specs = product.specs ? JSON.parse(product.specs) : {};
+  const externalLinks = product.externalLinks ? JSON.parse(product.externalLinks) : {};
 
   return (
     <div className="min-h-screen py-20 clk-bg-gray">
@@ -118,30 +119,27 @@ export default function ProductDetail() {
                     Buy via Bank Transfer
                   </Button>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="btn-secondary py-4"
-                      asChild
-                    >
-                      <a href="#" target="_blank" rel="noopener noreferrer">
-                        Buy from Etsy
-                        <ExternalLink className="w-4 h-4 ml-2" />
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="btn-secondary py-4"
-                      asChild
-                    >
-                      <a href="#" target="_blank" rel="noopener noreferrer">
-                        Buy from N11
-                        <ExternalLink className="w-4 h-4 ml-2" />
-                      </a>
-                    </Button>
-                  </div>
+                  {Object.keys(externalLinks).length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-gray-700">Also available from:</h4>
+                      <div className="grid gap-2">
+                        {Object.entries(externalLinks).map(([platform, url]) => (
+                          <Button
+                            key={platform}
+                            variant="outline"
+                            size="sm"
+                            className="btn-secondary justify-start"
+                            asChild
+                          >
+                            <a href={url as string} target="_blank" rel="noopener noreferrer">
+                              Buy from {platform}
+                              <ExternalLink className="w-4 h-4 ml-2" />
+                            </a>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

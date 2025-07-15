@@ -5,6 +5,7 @@ import { z } from "zod";
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
   description: text("description").notNull(),
   fullDescription: text("full_description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
@@ -12,6 +13,7 @@ export const products = pgTable("products", {
   category: text("category").notNull(),
   inStock: boolean("in_stock").notNull().default(true),
   specs: text("specs"), // JSON string for technical specifications
+  externalLinks: text("external_links"), // JSON string for external store links
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -38,6 +40,7 @@ export const contacts = pgTable("contacts", {
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
+  captchaAnswer: integer("captcha_answer").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

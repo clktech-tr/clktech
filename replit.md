@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application for CLKtech, a technology company that designs and sells robot controller boards and electronic circuit modules. The application features a modern, responsive design with a React frontend and Express.js backend, supporting product catalog management, ordering system, and admin functionality.
+This is a full-stack web application for CLKtech, a technology company that designs and sells robot controller boards and electronic circuit modules. The application features a modern, responsive design with a React frontend and Express.js backend, supporting product catalog management, ordering system, and admin functionality. Recently updated to include external store integration, YouTube tutorials, math CAPTCHA security, and SEO-friendly product routing.
 
 ## User Preferences
 
@@ -124,3 +124,32 @@ Preferred communication style: Simple, everyday language.
 - Session-based admin authentication
 - Responsive design for all devices
 - SEO-friendly routing structure
+
+## Recent Changes (January 2025)
+
+### Enhanced Product Features
+- Added product slug field for SEO-friendly URLs (/products/product-name)
+- Implemented external store links (Etsy, N11, Trendyol) with JSON storage
+- Products now support dual routing: by ID and by slug
+- Enhanced product form to include slug and external links management
+
+### Security Improvements
+- Added math CAPTCHA to contact form for bot protection
+- CAPTCHA includes randomized math questions (+, -, ×) with validation
+- Auto-regenerates CAPTCHA after form submission or incorrect answers
+
+### Video Integration
+- Added YouTube video embedding to coding app download page
+- Replaced placeholder video with actual YouTube iframe
+- Improved tutorial presentation with proper aspect ratio
+
+### Admin Panel Enhancements
+- Updated product management to include slug and external links fields
+- Enhanced product form with JSON editors for specs and external links
+- Improved form validation and error handling
+
+### Database Schema Updates
+- Added slug field to products table (unique constraint)
+- Added externalLinks field to products table (JSON storage)
+- Added captchaAnswer field to contacts table for CAPTCHA validation
+- Updated storage layer to handle new fields with proper defaults

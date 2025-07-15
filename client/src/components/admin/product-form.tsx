@@ -34,6 +34,7 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: product?.name || "",
+      slug: product?.slug || "",
       description: product?.description || "",
       fullDescription: product?.fullDescription || "",
       price: product?.price || "",
@@ -47,6 +48,11 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
         voltage: "",
         digital_io: "",
         analog_inputs: ""
+      }),
+      externalLinks: product?.externalLinks || JSON.stringify({
+        "Etsy": "",
+        "N11": "",
+        "Trendyol": ""
       }),
     },
   });
@@ -123,6 +129,20 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
               {form.formState.errors.name && (
                 <p className="text-red-500 text-sm mt-1">
                   {form.formState.errors.name.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="slug">Product Slug (URL-friendly)</Label>
+              <Input
+                id="slug"
+                {...form.register("slug")}
+                className="mt-1"
+                placeholder="product-name"
+              />
+              {form.formState.errors.slug && (
+                <p className="text-red-500 text-sm mt-1">
+                  {form.formState.errors.slug.message}
                 </p>
               )}
             </div>
@@ -209,6 +229,22 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
             {form.formState.errors.specs && (
               <p className="text-red-500 text-sm mt-1">
                 {form.formState.errors.specs.message}
+              </p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="externalLinks">External Store Links (JSON)</Label>
+            <Textarea
+              id="externalLinks"
+              {...form.register("externalLinks")}
+              rows={4}
+              className="mt-1 font-mono text-sm"
+              placeholder='{"Etsy": "https://etsy.com/listing/...", "N11": "https://n11.com/...", "Trendyol": "https://trendyol.com/..."}'
+            />
+            {form.formState.errors.externalLinks && (
+              <p className="text-red-500 text-sm mt-1">
+                {form.formState.errors.externalLinks.message}
               </p>
             )}
           </div>
