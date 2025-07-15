@@ -11,8 +11,8 @@
     "inStock": true,
     "specs": "{\"microcontroller\":\"ARM Cortex-M4\",\"flash\":\"256KB\",\"ram\":\"64KB\",\"voltage\":\"3.3V - 5V\",\"digital_io\":\"20 pins\",\"analog_inputs\":\"8 channels\"}",
     "externalLinks": "{\"Etsy\":\"https://www.etsy.com/listing/linex-controller\",\"N11\":\"https://www.n11.com/product/linex-controller\",\"Trendyol\":\"https://www.trendyol.com/product/linex-controller\"}",
-    "createdAt": "2025-07-15T08:18:33.732Z",
-    "updatedAt": "2025-07-15T08:18:33.732Z"
+    "createdAt": "2025-07-15T08:23:52.940Z",
+    "updatedAt": "2025-07-15T08:23:52.940Z"
   },
   {
     "id": 2,
@@ -26,8 +26,8 @@
     "inStock": true,
     "specs": "{\"microcontroller\":\"ARM Cortex-M7\",\"flash\":\"512KB\",\"ram\":\"128KB\",\"voltage\":\"3.3V - 5V\",\"digital_io\":\"24 pins\",\"analog_inputs\":\"12 channels\"}",
     "externalLinks": "{\"Etsy\":\"https://www.etsy.com/listing/mazex-controller\",\"N11\":\"https://www.n11.com/product/mazex-controller\",\"Trendyol\":\"https://www.trendyol.com/product/mazex-controller\"}",
-    "createdAt": "2025-07-15T08:18:33.732Z",
-    "updatedAt": "2025-07-15T08:18:33.732Z"
+    "createdAt": "2025-07-15T08:23:52.940Z",
+    "updatedAt": "2025-07-15T08:23:52.940Z"
   },
   {
     "id": 3,
@@ -41,7 +41,7 @@
     "inStock": true,
     "specs": "{\"microcontroller\":\"ARM Cortex-M7\",\"flash\":\"1MB\",\"ram\":\"256KB\",\"voltage\":\"3.3V - 5V\",\"digital_io\":\"32 pins\",\"analog_inputs\":\"16 channels\"}",
     "externalLinks": "{\"Etsy\":\"https://www.etsy.com/listing/vivianx-controller\",\"N11\":\"https://www.n11.com/product/vivianx-controller\",\"Trendyol\":\"https://www.trendyol.com/product/vivianx-controller\"}",
-    "createdAt": "2025-07-15T08:18:33.732Z",
-    "updatedAt": "2025-07-15T08:18:33.732Z"
+    "createdAt": "2025-07-15T08:23:52.940Z",
+    "updatedAt": "2025-07-15T08:23:52.940Z"
   }
 ]
