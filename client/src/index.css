@@ -69,7 +69,7 @@
 
 @layer components {
   .hero-gradient {
-    background: linear-gradient(135deg, var(--clk-primary) 0%, var(--clk-secondary) 100%);
+    background: linear-gradient(90deg, #002349 0%, #957C3D 100%);
   }
   
   .card-hover {
@@ -87,11 +87,11 @@
   
   .nav-link:hover {
     color: var(--clk-primary);
+    transform: scale(1.05);
   }
   
   .btn-primary {
-    background: linear-gradient(135deg, var(--clk-primary) 0%, var(--clk-secondary) 100%);
-    @apply text-white font-semibold transition-all duration-300;
+    @apply bg-primary text-white hover:bg-primary/90;
   }
   
   .btn-primary:hover {
@@ -133,11 +133,11 @@
   }
   
   .clk-text-primary {
-    color: var(--clk-primary);
+    color: #002349;
   }
   
   .clk-text-secondary {
-    color: var(--clk-secondary);
+    color: #957C3D;
   }
   
   .clk-bg-primary {
@@ -154,5 +154,21 @@
   
   .clk-bg-gray {
     background-color: var(--clk-bg);
+  }
+  .bg-light, .clk-bg-light {
+    background-color: #B2B5E0;
+  }
+  .clk-text-light {
+    color: #B2B5E0;
+  }
+  .footer-link {
+    @apply transition-colors duration-300;
+    color: #9ca3af; /* Tailwind text-gray-400 */
+  }
+  .footer-link:hover {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, #f59e42, #34d399);
   }
 }

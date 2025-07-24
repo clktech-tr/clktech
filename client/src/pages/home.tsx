@@ -1,280 +1,191 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { ProductCard } from "@/components/product/product-card";
-import { Cpu, Code, Shield, ArrowRight, Check, ChevronLeft, ChevronRight, Zap, Wifi, Wrench } from "lucide-react";
+import { Cog, Award, Truck, CheckCircle } from "lucide-react";
 import type { Product } from "@shared/schema";
-import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
-  const { data: products = [] } = useQuery<Product[]>({
+  const { t } = useTranslation();
+  const { data: settings } = useQuery<any>({ queryKey: ["/api/settings"] });
+  const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
 
   const featuredProducts = products.slice(0, 3);
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = [
-    {
-      title: "Gelişmiş Robot Kontrol Kartları",
-      subtitle: "Geleceğin Robotik Projeleriniz İçin",
-      description: "CLKtech'in profesyonel seviye kontrol kartları ve sezgisel blok tabanlı kodlama ortamı ile robotik projenizi tasarlayın, inşa edin ve programlayın.",
-      image: "/api/uploads/linex.png",
-      features: ["ARM Cortex-M İşlemci", "WiFi Bağlantısı", "32 Giriş/Çıkış"]
-    },
-    {
-      title: "Elektronik Modüller & Sensörler",
-      subtitle: "Her Proje İçin Doğru Çözüm",
-      description: "Profesyonel kalitede elektronik modüller ve sensörler ile robotik projelerinize güç katın. Endüstri standardında kalite ve performans.",
-      image: "/api/uploads/mazex.png",
-      features: ["Hassas Sensörler", "Güçlü Motor Sürücüler", "Uzun Ömürlü Tasarım"]
-    },
-    {
-      title: "Blok Tabanlı Kodlama",
-      subtitle: "Programlama Artık Çok Kolay",
-      description: "Görsel blok tabanlı kodlama ortamı ile programlama öğrenin ve robotunuzu hayata geçirin. Hem yeni başlayanlar hem de uzmanlar için ideal.",
-      image: "/api/uploads/vivianx.png",
-      features: ["Görsel Programlama", "Gerçek Zamanlı Test", "Proje Şablonları"]
-    }
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
   return (
-    <div className="min-h-screen">
-      {/* Hero Section with Modern Slider */}
-      <section className="hero-gradient text-white py-20 lg:py-32 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div>
+      {/* Hero Section */}
+      <section id="home" className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `url('${settings?.blockCodeScreenshot1 || "/uploads/CLK_Block_Code_2_1752565795955.png"}')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center"
+          }}
+        ></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-center lg:text-left">
-              <div className="mb-4">
-                <span className="inline-block px-4 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm">
-                  {slides[currentSlide].subtitle}
-                </span>
-              </div>
-              <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                {slides[currentSlide].title}
+            <div>
+              <h1 className="text-4xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in">
+                {t("home.heroTitle1", "Eğitsel ")}
+                <span style={{ color: '#34d399' }}>{t("home.heroTitle2", "Robotik")}</span> &{" "}
+                <span style={{ color: '#f59e42' }}>{t("home.heroTitle3", "Programlama")}</span>{" "}
+                {t("home.heroTitle4", "Platformları")}
               </h1>
-              <p className="text-xl mb-8 opacity-90">
-                {slides[currentSlide].description}
+              <p className="text-xl text-slate-300 mb-8 leading-relaxed animate-slide-up">
+                {t("home.heroDesc", "Professional robotic controllers with visual block programming support. Perfect for education, competitions, and IoT development projects.")}
               </p>
-              
-              <div className="flex flex-wrap gap-4 mb-8">
-                {slides[currentSlide].features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
-                    <Check className="w-4 h-4" />
-                    <span className="text-sm">{feature}</span>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/products">
-                  <Button size="lg" className="btn-primary px-8 py-4 text-lg">
-                    Ürünleri Keşfedin
-                  </Button>
-                </Link>
-                <Link href="/coding-app">
-                  <Button size="lg" variant="outline" className="btn-secondary px-8 py-4 text-lg">
-                    Kodlama Uygulaması
-                  </Button>
-                </Link>
+              <div className="flex flex-col sm:flex-row gap-4 animate-slide-up">
+                <Button asChild size="lg" className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200">
+                  <Link href="/products">{t("home.discoverProducts", "View Products")}</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="border-2 border-white hover:bg-white hover:text-slate-900 text-white transition-all duration-300 hover:scale-105 hover:shadow-xl bg-white/10 backdrop-blur-sm">
+                  <Link href="/contact">{t("home.getQuote", "Get Custom Quote")}</Link>
+                </Button>
               </div>
             </div>
-            <div className="text-center">
-              <div className="w-full max-w-md mx-auto bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-white/20">
-                <div className="mb-6">
-                  <img 
-                    src={slides[currentSlide].image} 
-                    alt={slides[currentSlide].title}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
+            
+            <div className="hidden lg:block animate-float">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-2xl transform hover:scale-105 transition-all duration-500 hover:shadow-blue-500/20">
+                <div className="aspect-video rounded-lg overflow-hidden mb-4 relative group">
+                  <img
+                    src={settings?.blockCodeScreenshot2 || "/uploads/VivianX2.gif"}
+                    alt="CLK Block Code Arayüzü"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="h-2 bg-white/20 rounded-full">
-                      <div className="h-full bg-white rounded-full w-3/4"></div>
-                    </div>
-                    <div className="h-2 bg-white/20 rounded-full">
-                      <div className="h-full bg-white rounded-full w-1/2"></div>
-                    </div>
-                    <div className="h-2 bg-white/20 rounded-full">
-                      <div className="h-full bg-white rounded-full w-5/6"></div>
-                    </div>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <div className="flex justify-center space-x-2">
-                  {slides.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-all ${
-                        currentSlide === index ? 'bg-white' : 'bg-white/40'
-                      }`}
-                    />
-                  ))}
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-white mb-1 animate-pulse">{t("home.codingAppTitle", "CLK Block Code")}</div>
+                  <div className="text-slate-300 text-sm">{t("home.codingAppDescShort", "Advanced robotics platform in action")}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Slider Controls */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-2 rounded-full backdrop-blur-sm transition-colors"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-2 rounded-full backdrop-blur-sm transition-colors"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-        
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 clk-bg-light">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold clk-text-dark mb-4">
-              Neden CLKtech'i Tercih Etmelisiniz?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Yaratıcılar, eğitimciler ve mühendisler için tasarlanmış profesyonel seviye robotik geliştirme araçları
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">{t("home.whyChoose", "Why Choose CLK Tech?")}</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">{t("home.whyChooseDesc", "Educational robotics platforms designed for visual programming, perfect for students, teachers, and robotics enthusiasts.")}</p>
           </div>
+          
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="feature-card p-8 card-hover">
-              <div className="w-16 h-16 hero-gradient rounded-full flex items-center justify-center mb-6 mx-auto">
-                <Cpu className="w-8 h-8 text-white" />
+            <Card className="text-center border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-bounce">
+                  <Cog className="h-8 w-8 text-blue-600 transition-transform group-hover:rotate-180 duration-500" />
               </div>
-              <h3 className="text-xl font-semibold clk-text-dark mb-4 text-center">Gelişmiş Kontrol Kartları</h3>
-              <p className="text-gray-600 text-center">
-                Karmaşık robotik projeler için geniş giriş/çıkış kabiliyetleri olan yüksek performanslı mikrokontrolörler
-              </p>
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">{t("home.featureCards.1.title", "Visual Programming")}</h3>
+                <p className="text-slate-600">{t("home.featureCards.1.desc", "Easy-to-use block programming interface that makes robotics accessible to everyone.")}</p>
+              </CardContent>
             </Card>
-            <Card className="feature-card p-8 card-hover">
-              <div className="w-16 h-16 hero-gradient rounded-full flex items-center justify-center mb-6 mx-auto">
-                <Code className="w-8 h-8 text-white" />
+            
+            <Card className="text-center border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse">
+                  <Award className="h-8 w-8 text-emerald-600 transition-transform group-hover:scale-125 duration-300" />
               </div>
-              <h3 className="text-xl font-semibold clk-text-dark mb-4 text-center">Blok Tabanlı Kodlama</h3>
-              <p className="text-gray-600 text-center">
-                Robotunuz için optimize edilmiş kod üreten sezgisel görsel programlama ortamı
-              </p>
+                <h3 className="text-xl font-semibold text-slate-900 mb-3">{t("home.featureCards.2.title", "Educational Focus")}</h3>
+                <p className="text-slate-600">{t("home.featureCards.2.desc", "Designed specifically for educational environments and robotics competitions.")}</p>
+              </CardContent>
             </Card>
-            <Card className="feature-card p-8 card-hover">
-              <div className="w-16 h-16 hero-gradient rounded-full flex items-center justify-center mb-6 mx-auto">
-                <Shield className="w-8 h-8 text-white" />
+            
+            <Card className="text-center border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
+              <CardContent className="p-6">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-bounce">
+                  <Truck className="h-8 w-8 text-amber-600 transition-transform group-hover:scale-110 duration-300" />
               </div>
-              <h3 className="text-xl font-semibold clk-text-dark mb-4 text-center">Profesyonel Kalite</h3>
-              <p className="text-gray-600 text-center">
-                Kapsamlı test ve dokümantasyon ile endüstriyel kalite bileşenler
-              </p>
+                <h3 className="text-xl font-semibold text-slate-900 mb-3">{t("home.featureCards.3.title", "Complete Platform")}</h3>
+                <p className="text-slate-600">{t("home.featureCards.3.desc", "Hardware, software, and educational resources all included in one package.")}</p>
+              </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="py-20 clk-bg-gray">
+      {/* Featured Products Section */}
+      <section className="py-16 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold clk-text-dark mb-4">
-              Ürünlerimiz
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Robot kontrol kartları ve elektronik modüller ürün yelpazemizi keşfedin
-            </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">{t("home.productsTitle", "Featured Products")}</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">{t("home.productsDesc", "Explore our robotics platforms: LineX for beginners, MazeX for competitions, and VivianX for IoT projects.")}</p>
           </div>
           
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-300 h-48 rounded-lg mb-4"></div>
+                  <div className="bg-gray-300 h-4 rounded mb-2"></div>
+                  <div className="bg-gray-300 h-4 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+          )}
           
           <div className="text-center mt-12">
-            <Link href="/products">
-              <Button size="lg" className="btn-primary px-8 py-4 text-lg">
-                Tüm Ürünleri Görüntüle
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+            <Button asChild size="lg" className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200">
+              <Link href="/products">
+                {t("home.viewAllProducts", "View All Products")}
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Coding App Preview */}
-      <section className="py-20 bg-white">
+      {/* Block Code Programming Section */}
+      <section className="py-16 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold clk-text-dark mb-6">
-                CLK Block Code
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Sezgisel blok tabanlı kodlama ortamımız robot programlamayı herkes için erişilebilir hale getirir.
-              </p>
-              
-              <div className="bg-gray-50 p-6 rounded-xl mb-8">
-                <h3 className="text-lg font-semibold clk-text-dark mb-4">Temel Özellikler:</h3>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-center">
-                    <Check className="w-5 h-5 clk-text-primary mr-3" />
-                    Görsel blok tabanlı programlama
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-5 h-5 clk-text-primary mr-3" />
-                    Gerçek zamanlı kod üretimi
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-5 h-5 clk-text-primary mr-3" />
-                    Donanım simülasyonu
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-5 h-5 clk-text-primary mr-3" />
-                    Çoklu platform desteği
-                  </li>
-                </ul>
-              </div>
-
-              <Link href="/coding-app">
-                <Button size="lg" className="btn-primary px-8 py-4">
-                  Daha Fazla Bilgi
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">{t("home.visualBlockProgrammingTitle", "Visual Block Programming")}</h2>
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+              {t("home.visualBlockProgrammingDesc", "Our intuitive Block Code interface makes robotics programming accessible to everyone. No complex syntax – just drag, drop, and create!")}
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
+              <img 
+                src={settings?.blockCodeScreenshot1 || "/uploads/CLK_Block_Code_2_1752565795955.png"} 
+                alt="Robot Selection Interface" 
+                className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
+              />
+              <h3 className="text-xl font-semibold text-white mb-2">{t("home.block1Title", "Robot Selection")}</h3>
+              <p className="text-slate-300">{t("home.block1Desc", "Choose from MazeX, LineX, and VivianX platforms with one click.")}</p>
             </div>
-
-            <div className="bg-gray-900 rounded-xl p-4">
-              <div className="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="w-20 h-20 hero-gradient rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Code className="w-10 h-10" />
-                  </div>
-                  <h4 className="text-lg font-semibold mb-2">Blok Tabanlı Kodlama</h4>
-                  <p className="text-sm opacity-75">Sürükle & bırak programlama arayüzü</p>
-                </div>
-              </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
+              <img 
+                src={settings?.blockCodeScreenshot2 || "/uploads/CLK_Block_Code_4_1752565795956.png"} 
+                alt="Real-time Testing" 
+                className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
+              />
+              <h3 className="text-xl font-semibold text-white mb-2">{t("home.block2Title", "Visual Programming")}</h3>
+              <p className="text-slate-300">{t("home.block2Desc", "Drag and drop code blocks to create complex robot behaviors.")}</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
+              <img 
+                src={settings?.blockCodeScreenshot2 || "/uploads/CLK_Block_Code_3_1752565795955.png"} 
+                alt="Block Programming Interface" 
+                className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
+              />
+              <h3 className="text-xl font-semibold text-white mb-2">{t("home.block3Title", "Real-time Testing")}</h3>
+              <p className="text-slate-300">{t("home.block3Desc", "Test your code instantly and see results in real-time console output.")}</p>
             </div>
           </div>
         </div>

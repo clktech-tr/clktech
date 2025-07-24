@@ -1,8 +1,19 @@
 import { Link } from "wouter";
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import clkLogo from "@assets/clklogo_1752565795957.png";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 
 export function Footer() {
+  const { t } = useTranslation();
+  const [settings, setSettings] = useState<any>({});
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setSettings(data));
+  }, []);
+
   return (
     <footer className="clk-bg-black text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,19 +25,19 @@ export function Footer() {
               <span className="text-xl font-bold">CLKtech</span>
             </div>
             <p className="text-gray-400 mb-4">
-              Advanced robotics solutions for education and professional development.
+              {t("footer.companyInfo", "Advanced robotics solutions for education and professional development.")}
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href={settings.facebook || "https://facebook.com/"} className="footer-link" target="_blank" rel="noopener noreferrer">
                 <Facebook className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href={settings.twitter || "https://twitter.com/"} className="footer-link" target="_blank" rel="noopener noreferrer">
                 <Twitter className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href={settings.instagram || "https://instagram.com/"} className="footer-link" target="_blank" rel="noopener noreferrer">
                 <Instagram className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href={settings.youtube || "https://youtube.com/"} className="footer-link" target="_blank" rel="noopener noreferrer">
                 <Youtube className="w-6 h-6" />
               </a>
             </div>
@@ -34,40 +45,40 @@ export function Footer() {
 
           {/* Products */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Products</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("footer.products")}</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/products" className="hover:text-white transition">LineX Controller</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">MazeX Controller</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">VivianX Controller</Link></li>
-              <li><Link href="/products" className="hover:text-white transition">All Products</Link></li>
+              <li><Link href="/products/1" className="footer-link">LineX Controller</Link></li>
+              <li><Link href="/products/2" className="footer-link">MazeX Controller</Link></li>
+              <li><Link href="/products/3" className="footer-link">VivianX Controller</Link></li>
+              <li><Link href="/products" className="footer-link">{t("footer.allProducts")}</Link></li>
             </ul>
           </div>
 
           {/* Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("footer.support")}</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition">Tutorials</a></li>
-              <li><a href="#" className="hover:text-white transition">Community</a></li>
-              <li><Link href="/contact" className="hover:text-white transition">Technical Support</Link></li>
+              <li><Link href="/docs" className="footer-link">{t("footer.documentation")}</Link></li>
+              <li><Link href="/tutorials" className="footer-link">{t("footer.tutorials")}</Link></li>
+              <li><Link href="/community" className="footer-link">{t("footer.community")}</Link></li>
+              <li><Link href="/contact" className="footer-link">Teknik Destek</Link></li>
             </ul>
           </div>
 
           {/* Company */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Company</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("footer.company")}</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
-              <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+              <li><Link href="/about" className="footer-link">{t("footer.aboutUs")}</Link></li>
+              <li><Link href="/contact" className="footer-link">{t("footer.contact")}</Link></li>
+              <li><Link href="/privacy-policy" className="footer-link">{t("footer.privacyPolicy")}</Link></li>
+              <li><Link href="/terms-of-service" className="footer-link">{t("footer.termsOfService")}</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 CLKtech. All rights reserved.</p>
+          <p>&copy; 2024 CLKtech. {t("footer.copyright")}</p>
         </div>
       </div>
     </footer>

@@ -1,289 +1,133 @@
-import { Product, InsertProduct, Order, InsertOrder, Contact, InsertContact, Admin, InsertAdmin } from "@shared/schema";
-import fs from "fs";
-import path from "path";
+import { supabase } from './supabaseClient';
+import bcrypt from 'bcryptjs';
 
-export interface IStorage {
-  // Product operations
-  getProducts(): Promise<Product[]>;
-  getProduct(id: number): Promise<Product | undefined>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
-  deleteProduct(id: number): Promise<boolean>;
-  
-  // Order operations
-  getOrders(): Promise<Order[]>;
-  getOrder(id: number): Promise<Order | undefined>;
-  createOrder(order: InsertOrder): Promise<Order>;
-  updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
-  
-  // Contact operations
-  getContacts(): Promise<Contact[]>;
-  createContact(contact: InsertContact): Promise<Contact>;
-  
-  // Admin operations
-  getAdminByUsername(username: string): Promise<Admin | undefined>;
-  createAdmin(admin: InsertAdmin): Promise<Admin>;
+// Ürünler
+export async function getProducts() {
+  const { data, error } = await supabase.from('products').select('*').order('createdAt', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+export async function getProduct(id: number) {
+  const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data;
+}
+export async function createProduct(product: any) {
+  const { data, error } = await supabase.from('products').insert([product]).select().single();
+  if (error) throw error;
+  return data;
+}
+export async function updateProduct(id: number, product: any) {
+  const { data, error } = await supabase.from('products').update(product).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+}
+export async function deleteProduct(id: number) {
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) throw error;
+  return true;
 }
 
-export class MemStorage implements IStorage {
-  private products: Map<number, Product>;
-  private orders: Map<number, Order>;
-  private contacts: Map<number, Contact>;
-  private admins: Map<number, Admin>;
-  private currentProductId: number;
-  private currentOrderId: number;
-  private currentContactId: number;
-  private currentAdminId: number;
-
-  constructor() {
-    this.products = new Map();
-    this.orders = new Map();
-    this.contacts = new Map();
-    this.admins = new Map();
-    this.currentProductId = 1;
-    this.currentOrderId = 1;
-    this.currentContactId = 1;
-    this.currentAdminId = 1;
-    
-    this.initializeData();
+// Kullanıcılar
+export async function getUsers() {
+  const { data, error } = await supabase.from('users').select('*').order('createdAt', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+export async function getUser(id: number) {
+  const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data;
+}
+export async function getUserByEmail(email: string) {
+  const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
+  if (error) return undefined;
+  return data;
+}
+export async function createUser(user: any) {
+  // Şifreyi hash'le
+  const hashedPassword = await bcrypt.hash(user.password, 10);
+  const userWithHashedPassword = { ...user, password: hashedPassword };
+  
+  const { data, error } = await supabase.from('users').insert([userWithHashedPassword]).select().single();
+  if (error) throw error;
+  return data;
+}
+export async function updateUser(id: number, user: any) {
+  // Eğer şifre güncelleniyorsa hash'le
+  if (user.password) {
+    user.password = await bcrypt.hash(user.password, 10);
   }
-
-  private async initializeData() {
-    // Create default admin
-    const defaultAdmin: Admin = {
-      id: this.currentAdminId++,
-      username: "admin",
-      password: "admin123", // In production, this should be hashed
-    };
-    this.admins.set(defaultAdmin.id, defaultAdmin);
-
-    // Initialize sample products
-    const sampleProducts: Product[] = [
-      {
-        id: this.currentProductId++,
-        name: "LineX Controller",
-        slug: "linex-controller",
-        description: "Advanced line-following robot controller with integrated sensors and motor drivers",
-        fullDescription: "Advanced line-following robot controller with integrated sensors and motor drivers. Perfect for educational projects and competitive robotics. Includes built-in WiFi connectivity and real-time debugging capabilities.",
-        price: "89.99",
-        image: "/api/uploads/linex.png",
-        category: "Controllers",
-        inStock: true,
-        specs: JSON.stringify({
-          microcontroller: "ARM Cortex-M4",
-          flash: "256KB",
-          ram: "64KB",
-          voltage: "3.3V - 5V",
-          digital_io: "20 pins",
-          analog_inputs: "8 channels"
-        }),
-        externalLinks: JSON.stringify({
-          "Etsy": "https://www.etsy.com/listing/linex-controller",
-          "N11": "https://www.n11.com/product/linex-controller",
-          "Trendyol": "https://www.trendyol.com/product/linex-controller"
-        }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: this.currentProductId++,
-        name: "MazeX Controller",
-        slug: "mazex-controller",
-        description: "Maze-solving robot platform with advanced navigation algorithms and sensor arrays",
-        fullDescription: "Maze-solving robot platform with advanced navigation algorithms and sensor arrays. Features intelligent pathfinding, obstacle detection, and autonomous navigation capabilities.",
-        price: "129.99",
-        image: "/api/uploads/mazex.png",
-        category: "Controllers",
-        inStock: true,
-        specs: JSON.stringify({
-          microcontroller: "ARM Cortex-M7",
-          flash: "512KB",
-          ram: "128KB",
-          voltage: "3.3V - 5V",
-          digital_io: "24 pins",
-          analog_inputs: "12 channels"
-        }),
-        externalLinks: JSON.stringify({
-          "Etsy": "https://www.etsy.com/listing/mazex-controller",
-          "N11": "https://www.n11.com/product/mazex-controller",
-          "Trendyol": "https://www.trendyol.com/product/mazex-controller"
-        }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: this.currentProductId++,
-        name: "VivianX Controller",
-        slug: "vivianx-controller",
-        description: "Professional-grade robotics platform with wireless connectivity and advanced I/O",
-        fullDescription: "Professional-grade robotics platform with wireless connectivity and advanced I/O. Designed for complex robotics projects with real-time control and monitoring capabilities.",
-        price: "199.99",
-        image: "/api/uploads/vivianx.png",
-        category: "Controllers",
-        inStock: true,
-        specs: JSON.stringify({
-          microcontroller: "ARM Cortex-M7",
-          flash: "1MB",
-          ram: "256KB",
-          voltage: "3.3V - 5V",
-          digital_io: "32 pins",
-          analog_inputs: "16 channels"
-        }),
-        externalLinks: JSON.stringify({
-          "Etsy": "https://www.etsy.com/listing/vivianx-controller",
-          "N11": "https://www.n11.com/product/vivianx-controller",
-          "Trendyol": "https://www.trendyol.com/product/vivianx-controller"
-        }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
-    sampleProducts.forEach(product => {
-      this.products.set(product.id, product);
-    });
-
-    // Save to JSON files
-    await this.saveToFile();
-  }
-
-  private async saveToFile() {
-    const dataDir = path.join(process.cwd(), "data");
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    const productsData = Array.from(this.products.values());
-    const ordersData = Array.from(this.orders.values());
-
-    fs.writeFileSync(
-      path.join(dataDir, "products.json"),
-      JSON.stringify(productsData, null, 2)
-    );
-
-    fs.writeFileSync(
-      path.join(dataDir, "orders.json"),
-      JSON.stringify(ordersData, null, 2)
-    );
-  }
-
-  // Product operations
-  async getProducts(): Promise<Product[]> {
-    return Array.from(this.products.values());
-  }
-
-  async getProduct(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
-  }
-
-  async createProduct(product: InsertProduct): Promise<Product> {
-    const id = this.currentProductId++;
-    const newProduct: Product = {
-      ...product,
-      id,
-      slug: product.slug || product.name.toLowerCase().replace(/\s+/g, '-'),
-      inStock: product.inStock ?? true,
-      specs: product.specs ?? null,
-      externalLinks: product.externalLinks ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.products.set(id, newProduct);
-    await this.saveToFile();
-    return newProduct;
-  }
-
-  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined> {
-    const existingProduct = this.products.get(id);
-    if (!existingProduct) return undefined;
-
-    const updatedProduct: Product = {
-      ...existingProduct,
-      ...product,
-      updatedAt: new Date(),
-    };
-    this.products.set(id, updatedProduct);
-    await this.saveToFile();
-    return updatedProduct;
-  }
-
-  async deleteProduct(id: number): Promise<boolean> {
-    const deleted = this.products.delete(id);
-    if (deleted) {
-      await this.saveToFile();
-    }
-    return deleted;
-  }
-
-  // Order operations
-  async getOrders(): Promise<Order[]> {
-    return Array.from(this.orders.values());
-  }
-
-  async getOrder(id: number): Promise<Order | undefined> {
-    return this.orders.get(id);
-  }
-
-  async createOrder(order: InsertOrder): Promise<Order> {
-    const id = this.currentOrderId++;
-    const orderId = `CLK-${new Date().getFullYear()}-${String(id).padStart(3, '0')}`;
-    
-    const newOrder: Order = {
-      ...order,
-      id,
-      orderId,
-      status: order.status ?? "pending",
-      notes: order.notes ?? null,
-      createdAt: new Date(),
-    };
-    this.orders.set(id, newOrder);
-    await this.saveToFile();
-    return newOrder;
-  }
-
-  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
-    const order = this.orders.get(id);
-    if (!order) return undefined;
-
-    const updatedOrder: Order = {
-      ...order,
-      status,
-    };
-    this.orders.set(id, updatedOrder);
-    await this.saveToFile();
-    return updatedOrder;
-  }
-
-  // Contact operations
-  async getContacts(): Promise<Contact[]> {
-    return Array.from(this.contacts.values());
-  }
-
-  async createContact(contact: InsertContact): Promise<Contact> {
-    const id = this.currentContactId++;
-    const newContact: Contact = {
-      ...contact,
-      id,
-      createdAt: new Date(),
-    };
-    this.contacts.set(id, newContact);
-    return newContact;
-  }
-
-  // Admin operations
-  async getAdminByUsername(username: string): Promise<Admin | undefined> {
-    return Array.from(this.admins.values()).find(admin => admin.username === username);
-  }
-
-  async createAdmin(admin: InsertAdmin): Promise<Admin> {
-    const id = this.currentAdminId++;
-    const newAdmin: Admin = {
-      ...admin,
-      id,
-    };
-    this.admins.set(id, newAdmin);
-    return newAdmin;
-  }
+  
+  const { data, error } = await supabase.from('users').update(user).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+}
+export async function deleteUser(id: number) {
+  const { error } = await supabase.from('users').delete().eq('id', id);
+  if (error) throw error;
+  return true;
+}
+export async function verifyUserPassword(email: string, password: string) {
+  const user = await getUserByEmail(email);
+  if (!user) return null;
+  
+  const isValid = await bcrypt.compare(password, user.password);
+  return isValid ? user : null;
 }
 
-export const storage = new MemStorage();
+// Siparişler
+export async function getOrders() {
+  const { data, error } = await supabase.from('orders').select('*').order('createdAt', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+export async function getOrder(id: number) {
+  const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data;
+}
+export async function getOrdersByUserId(userId: number) {
+  const { data, error } = await supabase.from('orders').select('*').eq('user_id', userId).order('createdAt', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+export async function createOrder(order: any) {
+  const { data, error } = await supabase.from('orders').insert([order]).select().single();
+  if (error) throw error;
+  return data;
+}
+export async function updateOrder(id: number, order: any) {
+  const { data, error } = await supabase.from('orders').update(order).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+}
+export async function deleteOrder(id: number) {
+  const { error } = await supabase.from('orders').delete().eq('id', id);
+  if (error) throw error;
+  return true;
+}
+
+// İletişim Mesajları
+export async function getContacts() {
+  const { data, error } = await supabase.from('contacts').select('*').order('createdAt', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+export async function createContact(contact: any) {
+  const { data, error } = await supabase.from('contacts').insert([contact]).select().single();
+  if (error) throw error;
+  return data;
+}
+
+// Adminler (örnek, şifre hash önerilir)
+export async function getAdminByUsername(username: string) {
+  // Bu fonksiyon artık doğrudan routes.ts içinde Supabase sorgusu ile değiştirildi
+  // Geriye dönük uyumluluk için boş bırakıyoruz
+  return undefined;
+}
+export async function createAdmin(admin: any) {
+  const { data, error } = await supabase.from('admins').insert([admin]).select().single();
+  if (error) throw error;
+  return data;
+}

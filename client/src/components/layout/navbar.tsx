@@ -3,19 +3,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import clkLogo from "@assets/clklogo_1752565795957.png";
+import { useTranslation } from "react-i18next";
 
 export function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
 
   const isActive = (path: string) => location === path;
 
   const navItems = [
-    { path: "/", label: "Home" },
-    { path: "/products", label: "Products" },
-    { path: "/coding-app", label: "Coding App" },
-    { path: "/about", label: "About" },
-    { path: "/contact", label: "Contact" },
+    { path: "/", label: t("navbar.home") },
+    { path: "/products", label: t("navbar.products") },
+    { path: "/coding-app", label: t("navbar.codingApp") },
+    { path: "/about", label: t("navbar.about") },
+    { path: "/contact", label: t("navbar.contact") },
   ];
 
   return (
@@ -24,8 +26,7 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <img src={clkLogo} alt="CLKtech Logo" className="h-10 w-10 mr-3" />
-            <span className="text-xl font-bold clk-text-black">CLKtech</span>
+            <img src={clkLogo} alt="CLKtech Logo" className="h-20 w-20 min-h-[80px] min-w-[80px] flex-shrink-0 mr-0" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -34,18 +35,25 @@ export function Navbar() {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`nav-link font-medium ${
-                  isActive(item.path) ? "clk-text-orange" : "text-gray-700"
+                className={`nav-link font-medium px-4 py-2 transition-all duration-200 ${
+                  isActive(item.path)
+                    ? "bg-clip-text text-transparent bg-gradient-to-r from-[#f59e42] to-[#34d399]"
+                    : "text-gray-700 hover:bg-clip-text hover:text-transparent hover:bg-gradient-to-r hover:from-[#f59e42] hover:to-[#34d399]"
                 }`}
+                style={isActive(item.path) ? { pointerEvents: 'none' } : {}}
               >
                 {item.label}
               </Link>
             ))}
-            <Link href="/admin">
-              <Button variant="outline" className="btn-secondary">
-                Admin
-              </Button>
-            </Link>
+            {/* Dil seçici */}
+            <select
+              className="ml-4 border rounded px-2 py-1 text-sm"
+              value={i18n.language}
+              onChange={e => i18n.changeLanguage(e.target.value)}
+            >
+              <option value="tr">TR</option>
+              <option value="en">EN</option>
+            </select>
           </div>
 
           {/* Mobile menu button */}
@@ -68,19 +76,26 @@ export function Navbar() {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`block py-3 font-medium ${
-                  isActive(item.path) ? "clk-text-orange" : "text-gray-700"
+                className={`block py-3 font-medium px-4 transition-all duration-200 ${
+                  isActive(item.path)
+                    ? "bg-clip-text text-transparent bg-gradient-to-r from-[#f59e42] to-[#34d399]"
+                    : "text-gray-700 hover:bg-clip-text hover:text-transparent hover:bg-gradient-to-r hover:from-[#f59e42] hover:to-[#34d399]"
                 }`}
+                style={isActive(item.path) ? { pointerEvents: 'none' } : {}}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
-            <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" className="btn-secondary w-full mt-2">
-                Admin Panel
-              </Button>
-            </Link>
+            {/* Mobilde de dil seçici */}
+            <select
+              className="mt-2 border rounded px-2 py-1 text-sm w-full"
+              value={i18n.language}
+              onChange={e => i18n.changeLanguage(e.target.value)}
+            >
+              <option value="tr">TR</option>
+              <option value="en">EN</option>
+            </select>
           </div>
         </div>
       )}

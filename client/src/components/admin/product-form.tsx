@@ -12,6 +12,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@shared/schema";
 import { z } from "zod";
+import { useEffect } from "react";
 
 const productFormSchema = insertProductSchema.extend({
   imageFile: z.any().optional(),
@@ -33,11 +34,11 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      name: product?.name || "",
+      name: product?.name || { tr: "", en: "" },
       slug: product?.slug || "",
-      description: product?.description || "",
-      fullDescription: product?.fullDescription || "",
-      price: product?.price || "",
+      description: product?.description || { tr: "", en: "" },
+      fullDescription: product?.fullDescription || { tr: "", en: "" },
+      price: product?.price || { tr: "", en: "" },
       image: product?.image || "",
       category: product?.category || "",
       inStock: product?.inStock ?? true,
@@ -57,26 +58,118 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
     },
   });
 
+  useEffect(() => {
+    if (isOpen && product) {
+      form.reset({
+        name: product.name || { tr: "", en: "" },
+        slug: product.slug || "",
+        description: product.description || { tr: "", en: "" },
+        fullDescription: product.fullDescription || { tr: "", en: "" },
+        price: product.price || { tr: "", en: "" },
+        image: product.image || "",
+        category: product.category || "",
+        inStock: product.inStock ?? true,
+        specs: product.specs || JSON.stringify({
+          microcontroller: "",
+          flash: "",
+          ram: "",
+          voltage: "",
+          digital_io: "",
+          analog_inputs: ""
+        }),
+        externalLinks: product.externalLinks || JSON.stringify({
+          "Etsy": "",
+          "N11": "",
+          "Trendyol": ""
+        }),
+      });
+    }
+    if (isOpen && !product) {
+      form.reset({
+        name: { tr: "", en: "" },
+        slug: "",
+        description: { tr: "", en: "" },
+        fullDescription: { tr: "", en: "" },
+        price: { tr: "", en: "" },
+        image: "",
+        category: "",
+        inStock: true,
+        specs: JSON.stringify({
+          microcontroller: "",
+          flash: "",
+          ram: "",
+          voltage: "",
+          digital_io: "",
+          analog_inputs: ""
+        }),
+        externalLinks: JSON.stringify({
+          "Etsy": "",
+          "N11": "",
+          "Trendyol": ""
+        }),
+      });
+    }
+  }, [isOpen, product, form]);
+
   const productMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
+      // Form verilerini konsola yazdır (debug için)
+      console.log("Form data before processing:", data);
+      
       const formData = new FormData();
+      
+      // Slug alanını kontrol et ve boşsa otomatik oluştur
+      if (!data.slug || data.slug.trim() === "") {
+        // İngilizce ürün adından slug oluştur
+        const slugBase = data.name.en.toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        data.slug = slugBase || "product-" + Date.now(); // Fallback
+      }
       
       // Append all fields to FormData
       Object.entries(data).forEach(([key, value]) => {
         if (key === "imageFile" && value?.[0]) {
           formData.append("image", value[0]);
+        } else if (key === "inStock") {
+          // inStock'u boolean olarak ekle
+          formData.append("inStock", String(value === true || value === "true"));
+        } else if (["name", "description", "fullDescription", "price"].includes(key)) {
+          // Multilingual alanları JSON olarak ekle
+          formData.append(key, JSON.stringify(value));
+        } else if (["specs", "externalLinks"].includes(key)) {
+          try {
+            // Eğer zaten JSON string ise parse edip tekrar stringify yapalım
+            const parsedValue = typeof value === 'string' ? JSON.parse(value) : value;
+            formData.append(key, JSON.stringify(parsedValue));
+          } catch (e) {
+            // Parse edilemezse boş nesne olarak ekle
+            formData.append(key, JSON.stringify({}));
+          }
         } else if (key !== "imageFile") {
           formData.append(key, String(value));
         }
       });
+      
+      // FormData içeriğini konsola yazdır (debug için)
+      console.log("FormData entries:");
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
 
       const url = isEditing ? `/api/admin/products/${product.id}` : "/api/admin/products";
       const method = isEditing ? "PATCH" : "POST";
 
+      const headersObj = (() => {
+        const token = localStorage.getItem("admin_token");
+        if (token) return { Authorization: `Bearer ${token}` };
+        return undefined;
+      })();
       const response = await fetch(url, {
         method,
         body: formData,
         credentials: "include",
+        ...(headersObj ? { headers: headersObj } : {}),
       });
 
       if (!response.ok) {
@@ -120,15 +213,21 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="name">Product Name</Label>
+              <Label>Product Name (TR)</Label>
               <Input
-                id="name"
-                {...form.register("name")}
+                id="name.tr"
+                {...form.register("name.tr")}
+                className="mt-1"
+              />
+              <Label className="mt-2">Product Name (EN)</Label>
+              <Input
+                id="name.en"
+                {...form.register("name.en")}
                 className="mt-1"
               />
               {form.formState.errors.name && (
                 <p className="text-red-500 text-sm mt-1">
-                  {form.formState.errors.name.message}
+                  {(form.formState.errors.name as any)?.tr?.message || (form.formState.errors.name as any)?.en?.message}
                 </p>
               )}
             </div>
@@ -147,46 +246,68 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
               )}
             </div>
             <div>
-              <Label htmlFor="price">Price</Label>
+              <Label>Price (₺ - TR)</Label>
               <Input
-                id="price"
-                {...form.register("price")}
+                id="price.tr"
+                {...form.register("price.tr")}
                 className="mt-1"
+                type="number"
+                step="0.01"
+              />
+              <Label className="mt-2">Price ($ - EN)</Label>
+              <Input
+                id="price.en"
+                {...form.register("price.en")}
+                className="mt-1"
+                type="number"
+                step="0.01"
               />
               {form.formState.errors.price && (
                 <p className="text-red-500 text-sm mt-1">
-                  {form.formState.errors.price.message}
+                  {(form.formState.errors.price as any)?.tr?.message || (form.formState.errors.price as any)?.en?.message}
                 </p>
               )}
             </div>
           </div>
-          
           <div>
-            <Label htmlFor="description">Short Description</Label>
+            <Label>Short Description (TR)</Label>
             <Textarea
-              id="description"
-              {...form.register("description")}
-              rows={3}
+              id="description.tr"
+              {...form.register("description.tr")}
+              rows={2}
+              className="mt-1"
+            />
+            <Label className="mt-2">Short Description (EN)</Label>
+            <Textarea
+              id="description.en"
+              {...form.register("description.en")}
+              rows={2}
               className="mt-1"
             />
             {form.formState.errors.description && (
               <p className="text-red-500 text-sm mt-1">
-                {form.formState.errors.description.message}
+                {(form.formState.errors.description as any)?.tr?.message || (form.formState.errors.description as any)?.en?.message}
               </p>
             )}
           </div>
-          
           <div>
-            <Label htmlFor="fullDescription">Full Description</Label>
+            <Label>Full Description (TR)</Label>
             <Textarea
-              id="fullDescription"
-              {...form.register("fullDescription")}
-              rows={4}
+              id="fullDescription.tr"
+              {...form.register("fullDescription.tr")}
+              rows={3}
+              className="mt-1"
+            />
+            <Label className="mt-2">Full Description (EN)</Label>
+            <Textarea
+              id="fullDescription.en"
+              {...form.register("fullDescription.en")}
+              rows={3}
               className="mt-1"
             />
             {form.formState.errors.fullDescription && (
               <p className="text-red-500 text-sm mt-1">
-                {form.formState.errors.fullDescription.message}
+                {(form.formState.errors.fullDescription as any)?.tr?.message || (form.formState.errors.fullDescription as any)?.en?.message}
               </p>
             )}
           </div>
@@ -221,7 +342,22 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
             <Label htmlFor="specs">Technical Specifications (JSON)</Label>
             <Textarea
               id="specs"
-              {...form.register("specs")}
+              {...form.register("specs", {
+                setValueAs: (value) => {
+                  try {
+                    // Boş değer kontrolü
+                    if (!value || value.trim() === "") {
+                      return JSON.stringify({});
+                    }
+                    // JSON formatını doğrula ve düzgün formatta döndür
+                    const parsed = JSON.parse(value);
+                    return JSON.stringify(parsed);
+                  } catch (e) {
+                    // Geçersiz JSON ise boş nesne döndür
+                    return JSON.stringify({});
+                  }
+                }
+              })}
               rows={6}
               className="mt-1 font-mono text-sm"
               placeholder='{"microcontroller": "ARM Cortex-M4", "flash": "256KB", "ram": "64KB"}'
@@ -237,7 +373,22 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
             <Label htmlFor="externalLinks">External Store Links (JSON)</Label>
             <Textarea
               id="externalLinks"
-              {...form.register("externalLinks")}
+              {...form.register("externalLinks", {
+                setValueAs: (value) => {
+                  try {
+                    // Boş değer kontrolü
+                    if (!value || value.trim() === "") {
+                      return JSON.stringify({});
+                    }
+                    // JSON formatını doğrula ve düzgün formatta döndür
+                    const parsed = JSON.parse(value);
+                    return JSON.stringify(parsed);
+                  } catch (e) {
+                    // Geçersiz JSON ise boş nesne döndür
+                    return JSON.stringify({});
+                  }
+                }
+              })}
               rows={4}
               className="mt-1 font-mono text-sm"
               placeholder='{"Etsy": "https://etsy.com/listing/...", "N11": "https://n11.com/...", "Trendyol": "https://trendyol.com/..."}'

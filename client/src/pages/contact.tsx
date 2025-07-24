@@ -13,15 +13,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { z } from "zod";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 // Extended schema to include CAPTCHA validation
 const contactFormSchema = insertContactSchema.extend({
-  captchaAnswer: z.number().int().positive(),
+  captchaAnswer: z.number().int(), // .positive() kaldırıldı
 });
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export default function Contact() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [captchaQuestion, setCaptchaQuestion] = useState({ question: "", answer: 0 });
 
@@ -106,31 +108,41 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen py-20 clk-bg-gray">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen w-full relative overflow-x-hidden" style={{backgroundColor:'#f8fafc'}}>
+      {/* SVG Grid Pattern BG */}
+      <svg className="absolute inset-0 w-full h-full opacity-20 z-0" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="20" height="20" fill="#f8fafc" />
+            <circle cx="1" cy="1" r="1" fill="#e5e7eb" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl lg:text-5xl font-bold clk-text-black mb-4">
-            Get in Touch
+          <h1 className="text-4xl lg:text-5xl font-bold text-[#374151] mb-4">
+            {t("contact.title")}
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Have questions about our products or need technical support? We're here to help!
+          <p className="text-xl text-[#374151] max-w-3xl mx-auto">
+            {t("contact.subtitle")}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Form */}
-          <Card>
+          <Card className="shadow-xl border-none bg-white/90">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold clk-text-black">
-                Send us a message
+              <CardTitle className="text-2xl font-semibold text-[#374151]">
+                {t("contact.form.title")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">{t("contact.form.firstName")}</Label>
                     <Input
                       id="firstName"
                       {...form.register("firstName")}
@@ -143,7 +155,7 @@ export default function Contact() {
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName">{t("contact.form.lastName")}</Label>
                     <Input
                       id="lastName"
                       {...form.register("lastName")}
@@ -158,7 +170,7 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("contact.form.email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -173,16 +185,16 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <Label htmlFor="subject">Subject</Label>
+                  <Label htmlFor="subject">{t("contact.form.subject")}</Label>
                   <Select onValueChange={(value) => form.setValue("subject", value)}>
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select a subject" />
+                      <SelectValue placeholder={t("contact.form.subjectPlaceholder")}/>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="technical">Technical Support</SelectItem>
-                      <SelectItem value="sales">Sales Inquiry</SelectItem>
-                      <SelectItem value="general">General Question</SelectItem>
-                      <SelectItem value="partnership">Partnership</SelectItem>
+                      <SelectItem value="technical">{t("contact.form.subjectOptions.technical")}</SelectItem>
+                      <SelectItem value="sales">{t("contact.form.subjectOptions.sales")}</SelectItem>
+                      <SelectItem value="general">{t("contact.form.subjectOptions.general")}</SelectItem>
+                      <SelectItem value="partnership">{t("contact.form.subjectOptions.partnership")}</SelectItem>
                     </SelectContent>
                   </Select>
                   {form.formState.errors.subject && (
@@ -193,7 +205,7 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <Label htmlFor="message">Message</Label>
+                  <Label htmlFor="message">{t("contact.form.message")}</Label>
                   <Textarea
                     id="message"
                     {...form.register("message")}
@@ -210,14 +222,14 @@ export default function Contact() {
                 {/* Math CAPTCHA */}
                 <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
                   <Label htmlFor="captchaAnswer" className="text-sm font-medium">
-                    Security Check: What is {captchaQuestion.question}?
+                    {t("contact.form.captchaLabel", { question: captchaQuestion.question })}
                   </Label>
                   <div className="flex items-center gap-3 mt-2">
                     <Input
                       id="captchaAnswer"
                       type="number"
                       {...form.register("captchaAnswer", { valueAsNumber: true })}
-                      placeholder="Enter your answer"
+                      placeholder={t("contact.form.captchaPlaceholder")}
                       className="w-32"
                     />
                     <Button
@@ -226,7 +238,7 @@ export default function Contact() {
                       onClick={generateCaptcha}
                       className="text-sm text-gray-600 hover:text-gray-800"
                     >
-                      New Question
+                      {t("contact.form.newQuestion")}
                     </Button>
                   </div>
                   {form.formState.errors.captchaAnswer && (
@@ -238,80 +250,77 @@ export default function Contact() {
 
                 <Button
                   type="submit"
-                  className="btn-primary w-full py-3"
+                  className="w-full py-3 bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200"
                   disabled={contactMutation.isPending}
                 >
-                  {contactMutation.isPending ? "Sending..." : "Send Message"}
+                  {contactMutation.isPending ? t("contact.form.sending") : t("contact.form.send")}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
+          {/* Contact Info */}
           <div className="space-y-6">
-            <Card>
+            <Card className="shadow-md border-none bg-white/90">
               <CardHeader>
-                <CardTitle className="text-2xl font-semibold clk-text-black">
-                  Contact Information
+                <CardTitle className="text-2xl font-semibold text-[#374151]">
+                  {t("contact.info.title")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-start">
-                  <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-gradient-to-br from-[#f59e42] to-[#34d399] shadow">
                     <Mail className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold clk-text-black mb-1">Email</h4>
-                    <p className="text-gray-600">info@clktech.com</p>
-                    <p className="text-gray-600">support@clktech.com</p>
+                    <h4 className="font-semibold text-[#374151] mb-1">{t("contact.info.email")}</h4>
+                    <p className="text-[#374151]">clktechtr@gmail.com</p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-gradient-to-br from-[#34d399] to-[#f59e42] shadow">
                     <Phone className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold clk-text-black mb-1">Phone</h4>
-                    <p className="text-gray-600">+90 212 555 0123</p>
-                    <p className="text-gray-600">+90 212 555 0124</p>
+                    <h4 className="font-semibold text-[#374151] mb-1">{t("contact.info.phone")}</h4>
+                    <p className="text-[#374151]">+905373455453</p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-gradient-to-br from-[#f59e42] to-[#34d399] shadow">
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold clk-text-black mb-1">Address</h4>
-                    <p className="text-gray-600">
-                      123 Technology Street<br />
-                      Istanbul, Turkey 34000
+                    <h4 className="font-semibold text-[#374151] mb-1">{t("contact.info.address")}</h4>
+                    <p className="text-[#374151]">
+                      Merkez / KONYA 42100
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="w-12 h-12 hero-gradient rounded-lg flex items-center justify-center mr-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center mr-4 bg-gradient-to-br from-[#34d399] to-[#f59e42] shadow">
                     <Clock className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold clk-text-black mb-1">Business Hours</h4>
-                    <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                    <p className="text-gray-600">Saturday: 10:00 AM - 4:00 PM</p>
+                    <h4 className="font-semibold text-[#374151] mb-1">{t("contact.info.businessHours")}</h4>
+                    <p className="text-[#374151]">{t("contact.info.businessHoursWeek")}</p>
+                    <p className="text-[#374151]">{t("contact.info.businessHoursSat")}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Map */}
-            <Card>
+            <Card className="shadow-md border-none bg-white/90">
               <CardContent className="p-6">
                 <div className="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <MapPin className="w-12 h-12 mx-auto mb-2" />
-                    <p className="font-semibold">Istanbul, Turkey</p>
-                    <p className="text-sm">Google Maps Integration</p>
+                  <div className="text-center text-[#374151]">
+                    <MapPin className="w-12 h-12 mx-auto mb-2 text-[#f59e42]" />
+                    <p className="font-semibold">{t("contact.info.mapCity")}</p>
+                    <p className="text-sm">{t("contact.info.mapDesc")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -319,6 +328,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
+      <div style={{ height: '48px' }} />
     </div>
   );
 }

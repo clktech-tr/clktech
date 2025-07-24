@@ -12,6 +12,7 @@ import CodingApp from "@/pages/coding-app";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Admin from "@/pages/admin";
+import TestButton from "@/pages/test-button";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -27,6 +28,7 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
           <Route path="/admin" component={Admin} />
+          <Route path="/test-button" component={TestButton} />
           <Route component={NotFound} />
         </Switch>
       </main>

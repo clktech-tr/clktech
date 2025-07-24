@@ -22,12 +22,13 @@ export default {
           foreground: "var(--popover-foreground)",
         },
         primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
+          DEFAULT: '#002349',
         },
         secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
+          DEFAULT: '#957C3D',
+        },
+        light: {
+          DEFAULT: '#B2B5E0',
         },
         muted: {
           DEFAULT: "var(--muted)",

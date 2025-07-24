@@ -1,11 +1,15 @@
 import type { Express, Request, Response } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage';
 import { insertProductSchema, insertOrderSchema, insertContactSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import jwt from "jsonwebtoken";
+import { supabase } from "./supabaseClient";
+
+const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
 
 // Configure multer for file uploads
 const uploadsDir = path.join(process.cwd(), "public", "uploads");
@@ -35,6 +39,59 @@ const upload = multer({
   },
 });
 
+const downloadsDir = path.join(process.cwd(), "public", "downloads");
+if (!fs.existsSync(downloadsDir)) {
+  fs.mkdirSync(downloadsDir, { recursive: true });
+}
+
+const zipUpload = multer({
+  storage: multer.diskStorage({
+    destination: downloadsDir,
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
+    },
+  }),
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
+  fileFilter: (req, file, cb) => {
+    // Dosya uzantısını ve MIME tipini kontrol et
+    const extname = path.extname(file.originalname).toLowerCase();
+    console.log('Dosya yükleme isteği:', { filename: file.originalname, mimetype: file.mimetype, extname });
+    
+    // Daha esnek bir kontrol ekleyelim
+    if (extname === '.zip' || file.mimetype === 'application/zip' || 
+        file.mimetype === 'application/x-zip-compressed' || 
+        file.mimetype === 'application/octet-stream') {
+      cb(null, true);
+    } else {
+      cb(new Error('Sadece .zip dosyası yükleyebilirsiniz.'));
+    }
+  },
+});
+
+// Multer hata yakalama middleware'i
+const handleMulterError = (err: any, req: Request, res: Response, next: any) => {
+  if (err instanceof multer.MulterError) {
+    // Multer hatası (dosya boyutu sınırı aşıldı, vb.)
+    console.error('Multer hatası:', err);
+    
+    // Dosya boyutu hatası için özel mesaj
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      const maxSizeMB = 200; // 200MB
+      return res.status(400).json({ 
+        message: `Dosya boyutu çok büyük. Maksimum dosya boyutu: ${maxSizeMB}MB` 
+      });
+    }
+    
+    return res.status(400).json({ message: `Dosya yükleme hatası: ${err.message}` });
+  } else if (err) {
+    // Diğer hatalar
+    console.error('Dosya yükleme hatası:', err);
+    return res.status(500).json({ message: `Dosya yükleme hatası: ${err.message}` });
+  }
+  next();
+};
+
 // Simple admin authentication middleware
 const adminAuth = async (req: Request, res: Response, next: any) => {
   const { username, password } = req.body;
@@ -43,13 +100,85 @@ const adminAuth = async (req: Request, res: Response, next: any) => {
     return res.status(401).json({ message: "Username and password required" });
   }
 
-  const admin = await storage.getAdminByUsername(username);
+  const admin = await getAdminByUsername(username);
   if (!admin || admin.password !== password) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
   next();
 };
+
+// JWT ile admin doğrulama middleware
+const adminJwtAuth = (req: Request, res: Response, next: any) => {
+  const authHeader = req.headers["authorization"];
+  console.log("Authorization header:", authHeader); // DEBUG LOG
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log("JWT decoded:", decoded); // DEBUG LOG
+    (req as any).admin = decoded;
+    next();
+  } catch (err) {
+    console.log("JWT error:", err); // DEBUG LOG
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};
+
+// Güvenli JSON parse fonksiyonu (her durumda stringe çevirip parse etmeye çalış)
+function safeParseJson(val: any) {
+  // Eğer değer null veya undefined ise, boş bir nesne döndür
+  if (val === null || val === undefined) {
+    console.log("safeParseJson: null/undefined value, returning empty object");
+    return {};
+  }
+  
+  // Eğer değer zaten bir nesne ise, doğrudan döndür
+  if (typeof val === "object" && val !== null) {
+    console.log("safeParseJson: already an object, returning as is");
+    return val;
+  }
+  
+  // Eğer değer bir string ise, JSON.parse ile parse etmeyi dene
+  if (typeof val === "string") {
+    try { 
+      // Boş string kontrolü
+      if (val.trim() === "") {
+        console.log("safeParseJson: empty string, returning empty object");
+        return {};
+      }
+      
+      const parsed = JSON.parse(val);
+      console.log("safeParseJson: successfully parsed string to object");
+      return parsed; 
+    } catch (e) { 
+      console.log("safeParseJson: failed to parse string, error:", e);
+      // Eğer geçerli bir JSON değilse ve boş string ise, boş nesne döndür
+      if (val.trim() === "") {
+        return {};
+      }
+      return val; 
+    }
+  }
+  
+  // Diğer tüm durumlar için, string'e çevirip parse etmeyi dene
+  try { 
+    const stringVal = String(val);
+    if (stringVal.trim() === "") {
+      console.log("safeParseJson: empty string after conversion, returning empty object");
+      return {};
+    }
+    
+    const parsed = JSON.parse(stringVal);
+    console.log("safeParseJson: successfully parsed converted string to object");
+    return parsed; 
+  } catch (e) { 
+    console.log("safeParseJson: failed to parse converted string, error:", e);
+    return val; 
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files
@@ -63,9 +192,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all products
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
-      const products = await storage.getProducts();
+      const products = await getProducts();
       res.json(products);
     } catch (error) {
+      console.error("PRODUCTS ERROR:", error); // Hata detayını logla
       res.status(500).json({ message: "Failed to fetch products" });
     }
   });
@@ -79,12 +209,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try to get by ID first
       const id = parseInt(identifier);
       if (!isNaN(id)) {
-        product = await storage.getProduct(id);
+        product = await getProduct(id);
       }
       
       // If not found by ID, try to get by slug
       if (!product) {
-        const products = await storage.getProducts();
+        const products = await getProducts();
         product = products.find(p => p.slug === identifier);
       }
       
@@ -102,10 +232,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
       const orderData = insertOrderSchema.parse(req.body);
-      const order = await storage.createOrder(orderData);
+      const order = await createOrder(orderData);
       res.status(201).json(order);
     } catch (error) {
-      res.status(400).json({ message: "Invalid order data" });
+      res.status(400).json({ message: "Invalid order data", details: error instanceof Error ? error.message : error });
     }
   });
 
@@ -113,97 +243,244 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contacts", async (req: Request, res: Response) => {
     try {
       const contactData = insertContactSchema.parse(req.body);
-      const contact = await storage.createContact(contactData);
+      const contact = await createContact(contactData);
       res.status(201).json(contact);
     } catch (error) {
-      res.status(400).json({ message: "Invalid contact data" });
+      res.status(400).json({ message: "Invalid contact data", details: error instanceof Error ? error.message : error });
     }
   });
 
   // Admin authentication
-  app.post("/api/admin/login", adminAuth, async (req: Request, res: Response) => {
-    res.json({ message: "Login successful" });
+  app.post("/api/admin/login", async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(401).json({ message: "Email and password required" });
+    }
+    
+    // Sabit admin bilgileri ile kontrol et
+    if (email === 'admin@clktech.com' && password === 'admin') {
+      const token = jwt.sign({ email: 'admin@clktech.com', id: 1 }, JWT_SECRET, { expiresIn: "2h" });
+      return res.json({ message: "Login successful", token, user: { id: 1, email: 'admin@clktech.com' } });
+    }
+    
+    try {
+      // Supabase'den admin bilgilerini al
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', email)
+        .single();
+      
+      if (error) {
+        console.error("Admin arama hatası:", error);
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      if (!admin) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Şifre kontrolü
+      if (admin.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // JWT oluştur
+      const token = jwt.sign({ email: admin.email, id: admin.id }, JWT_SECRET, { expiresIn: "2h" });
+      return res.json({ message: "Login successful", token, user: { id: admin.id, email: admin.email } });
+    } catch (err) {
+      console.error("Login error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
   });
 
   // Admin-only routes
 
   // Get all orders (admin only)
-  app.get("/api/admin/orders", adminAuth, async (req: Request, res: Response) => {
+  app.get("/api/admin/orders", adminJwtAuth, async (req: Request, res: Response) => {
     try {
-      const orders = await storage.getOrders();
+      const orders = await getOrders() || [];
       res.json(orders);
     } catch (error) {
+      console.error("ORDERS ERROR:", error); // Hata detayını logla
       res.status(500).json({ message: "Failed to fetch orders" });
     }
   });
 
-  // Update order status (admin only)
-  app.patch("/api/admin/orders/:id", adminAuth, async (req: Request, res: Response) => {
+  // Update order status or notes (admin only)
+  app.patch("/api/admin/orders/:id", adminJwtAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const { status } = req.body;
-      
-      const order = await storage.updateOrderStatus(id, status);
+      const { status, notes } = req.body;
+      let order = await getOrder(id);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+      if (typeof status !== 'undefined') {
+        order = await updateOrder(id, { status });
+      }
+      if (typeof notes !== 'undefined') {
+        order = await updateOrder(id, { notes });
+      }
       res.json(order);
     } catch (error) {
       res.status(500).json({ message: "Failed to update order" });
     }
   });
 
-  // Get all contacts (admin only)
-  app.get("/api/admin/contacts", adminAuth, async (req: Request, res: Response) => {
+  // Delete order (admin only)
+  app.delete("/api/admin/orders/:id", adminJwtAuth, async (req: Request, res: Response) => {
     try {
-      const contacts = await storage.getContacts();
+      const id = parseInt(req.params.id);
+      const deleted = await deleteOrder(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json({ message: "Order deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
+
+  // Get all contacts (admin only)
+  app.get("/api/admin/contacts", adminJwtAuth, async (req: Request, res: Response) => {
+    try {
+      const contacts = await getContacts();
       res.json(contacts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch contacts" });
     }
   });
 
-  // Create product (admin only)
-  app.post("/api/admin/products", adminAuth, upload.single('image'), async (req: Request, res: Response) => {
+  // İletişim mesajı sil (admin only)
+  app.delete("/api/admin/contacts/:id", adminJwtAuth, async (req: Request, res: Response) => {
     try {
-      const productData = insertProductSchema.parse({
-        ...req.body,
-        image: req.file ? `/api/uploads/${req.file.filename}` : req.body.image,
-      });
+      const id = parseInt(req.params.id);
+      const { error } = await supabase.from('contacts').delete().eq('id', id);
+      if (error) return res.status(500).json({ message: "Failed to delete contact", details: error.message });
+      res.json({ message: "Contact deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete contact" });
+    }
+  });
+
+  // Create product (admin only)
+  app.post("/api/admin/products", adminJwtAuth, upload.single('image'), async (req: Request, res: Response) => {
+    try {
+      console.log("Product data received:", req.body);
+      console.log("File received:", req.file);
       
-      const product = await storage.createProduct(productData);
+      // Slug kontrolü
+      if (!req.body.slug || req.body.slug.trim() === "") {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          details: "Slug field is required" 
+        });
+      }
+      
+      // Veri dönüşümü
+      const productData = {
+        ...req.body,
+        inStock: req.body.inStock === "true" || req.body.inStock === true,
+        image: req.file ? `/api/uploads/${req.file.filename}` : req.body.image,
+        name: safeParseJson(req.body.name),
+        description: safeParseJson(req.body.description),
+        fullDescription: safeParseJson(req.body.fullDescription),
+        price: safeParseJson(req.body.price),
+        specs: safeParseJson(req.body.specs),
+        externalLinks: safeParseJson(req.body.externalLinks),
+      };
+      
+      // Zorunlu alanların kontrolü
+      if (!productData.name?.tr || !productData.name?.en) {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          details: "Product name is required in both Turkish and English" 
+        });
+      }
+      
+      if (!productData.category) {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          details: "Category is required" 
+        });
+      }
+      
+      console.log("Processed product data:", JSON.stringify(productData, null, 2));
+      
+      // Ürün oluşturma
+      const product = await createProduct(productData);
       res.status(201).json(product);
     } catch (error) {
-      res.status(400).json({ message: "Invalid product data" });
+      console.error("Product creation error:", error);
+      
+      if (error instanceof Error && "errors" in error) {
+        // ZodError
+        return res.status(400).json({ message: "Invalid product data", details: (error as any).errors });
+      }
+      res.status(400).json({ message: "Invalid product data", details: (error as Error).message || error });
     }
   });
 
   // Update product (admin only)
-  app.patch("/api/admin/products/:id", adminAuth, upload.single('image'), async (req: Request, res: Response) => {
+  app.patch("/api/admin/products/:id", adminJwtAuth, upload.single('image'), async (req: Request, res: Response) => {
     try {
+      console.log("Product update data received:", req.body);
+      console.log("File received for update:", req.file);
+      
       const id = parseInt(req.params.id);
+      
+      // Slug kontrolü
+      if (!req.body.slug || req.body.slug.trim() === "") {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          details: "Slug field is required" 
+        });
+      }
+      
+      // Veri dönüşümü
       const updateData = {
         ...req.body,
+        inStock: req.body.inStock === "true" || req.body.inStock === true,
         ...(req.file && { image: `/api/uploads/${req.file.filename}` }),
+        name: safeParseJson(req.body.name),
+        description: safeParseJson(req.body.description),
+        fullDescription: safeParseJson(req.body.fullDescription),
+        price: safeParseJson(req.body.price),
+        specs: safeParseJson(req.body.specs),
+        externalLinks: safeParseJson(req.body.externalLinks),
       };
       
-      const product = await storage.updateProduct(id, updateData);
+      // Zorunlu alanların kontrolü (güncelleme olduğu için sadece gönderilen alanları kontrol ediyoruz)
+      if (req.body.name && (!updateData.name?.tr || !updateData.name?.en)) {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          details: "Product name is required in both Turkish and English" 
+        });
+      }
+      
+      console.log("Processed update data:", JSON.stringify(updateData, null, 2));
+      
+      const parsedData = insertProductSchema.partial().parse(updateData);
+      const product = await updateProduct(id, parsedData);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
       res.json(product);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update product" });
+      if (error instanceof Error && "errors" in error) {
+        // ZodError
+        return res.status(400).json({ message: "Invalid product data", details: (error as any).errors });
+      }
+      res.status(400).json({ message: "Invalid product data", details: (error as Error).message || error });
     }
   });
 
   // Delete product (admin only)
-  app.delete("/api/admin/products/:id", adminAuth, async (req: Request, res: Response) => {
+  app.delete("/api/admin/products/:id", adminJwtAuth, async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteProduct(id);
+      const deleted = await deleteProduct(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Product not found" });
@@ -215,25 +492,248 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get admin stats
-  app.get("/api/admin/stats", adminAuth, async (req: Request, res: Response) => {
+  // ZIP dosyası yükleme (admin only)
+  app.post("/api/admin/upload-download", 
+    adminJwtAuth, 
+    (req: Request, res: Response, next: any) => {
+      console.log('ZIP dosyası yükleme isteği alındı');
+      next();
+    }, 
+    (req: Request, res: Response, next: any) => {
+      // Dosya yükleme işlemini try-catch bloğu içinde gerçekleştir
+      try {
+        zipUpload.single('file')(req, res, (err) => {
+          if (err) {
+            // handleMulterError middleware'ini manuel olarak çağır
+            return handleMulterError(err, req, res, next);
+          }
+          next();
+        });
+      } catch (error) {
+        console.error('Dosya yükleme hatası (genel):', error);
+        return res.status(500).json({ message: "Dosya yükleme işlemi başarısız oldu.", details: (error as Error).message });
+      }
+    },
+    async (req: Request, res: Response) => {
+      try {
+        console.log('ZIP dosyası yükleme işlemi tamamlandı', req.file);
+        if (!req.file) {
+          return res.status(400).json({ message: "Dosya yüklenemedi. Lütfen geçerli bir ZIP dosyası seçin." });
+        }
+        // Dosya yolu: /downloads/filename.zip
+        const url = `/downloads/${req.file.filename}`;
+        res.json({ url });
+      } catch (error) {
+        console.error('ZIP dosyası yükleme hatası:', error);
+        res.status(500).json({ message: "Dosya yüklenemedi.", details: (error as Error).message });
+      }
+    }
+  );
+
+  // Görsel yükleme (admin only)
+  app.post("/api/admin/products/upload-image", adminJwtAuth, upload.single('image'), async (req: Request, res: Response) => {
     try {
-      const products = await storage.getProducts();
-      const orders = await storage.getOrders();
-      const contacts = await storage.getContacts();
+      if (!req.file) {
+        return res.status(400).json({ message: "Görsel yüklenemedi." });
+      }
+      // Dosya yolu: /api/uploads/filename.jpg
+      const url = `/api/uploads/${req.file.filename}`;
+      res.json({ url });
+    } catch (error) {
+      res.status(500).json({ message: "Görsel yüklenemedi.", details: (error as Error).message });
+    }
+  });
+
+  // Get admin stats
+  app.get("/api/admin/stats", adminJwtAuth, async (req: Request, res: Response) => {
+    try {
+      const products = await getProducts() || [];
+      const orders = await getOrders() || [];
+      const contacts = await getContacts() || [];
       
       const stats = {
         totalProducts: products.length,
         pendingOrders: orders.filter(o => o.status === 'pending').length,
-        totalSales: orders.reduce((sum, order) => sum + parseFloat(order.price), 0),
+        totalSales: orders.reduce((sum, order) => {
+          const price = typeof order.price === 'number' ? order.price : parseFloat(order.price || '0');
+          return sum + (isNaN(price) ? 0 : price);
+        }, 0),
         totalOrders: orders.length,
         totalContacts: contacts.length,
       };
       
       res.json(stats);
     } catch (error) {
+      console.error("STATS ERROR:", error); // Hata detayını logla
       res.status(500).json({ message: "Failed to fetch stats" });
     }
+  });
+
+  // Site ayarlarını getir (admin)
+  app.get('/api/admin/settings', adminJwtAuth, async (req: Request, res: Response) => {
+    try {
+      const { data, error } = await supabase.from('settings').select('*').single();
+      if (error) return res.status(500).json({ message: 'Failed to fetch settings', details: error.message });
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch settings' });
+    }
+  });
+
+  // Site ayarlarını güncelle (admin)
+  app.patch('/api/admin/settings', adminJwtAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('Ayarlar güncelleme isteği alındı:', req.body);
+      
+      // Mevcut ayarları getir
+      const { data: current, error: getError } = await supabase.from('settings').select('*').single();
+      if (getError) {
+        console.error('Ayarlar getirme hatası:', getError);
+        
+        // downloadUrl sütunu hatası için özel mesaj
+        if (getError.message && getError.message.includes("downloadUrl")) {
+          return res.status(500).json({ 
+            message: 'Veritabanı şema hatası: downloadUrl sütunu bulunamadı', 
+            details: 'Lütfen Supabase SQL Editor\'da şu sorguyu çalıştırın: ALTER TABLE settings ADD COLUMN IF NOT EXISTS "downloadUrl" TEXT;' 
+          });
+        }
+        
+        return res.status(500).json({ message: 'Ayarlar getirilemedi', details: getError.message });
+      }
+      
+      if (!current) {
+        console.error('Ayarlar bulunamadı');
+        return res.status(404).json({ message: 'Ayarlar bulunamadı' });
+      }
+      
+      // Boolean değerleri doğru şekilde işle
+      const updatedSettings = { ...req.body };
+      
+      // havale ve harici boolean değerlerini kontrol et
+      if ('havale' in updatedSettings) {
+        updatedSettings.havale = updatedSettings.havale === true;
+      }
+      
+      if ('harici' in updatedSettings) {
+        updatedSettings.harici = updatedSettings.harici === true;
+      }
+      
+      // Sosyal medya URL'lerini kontrol et
+      const socialMediaFields = ['socialFacebook', 'socialTwitter', 'socialInstagram', 'socialLinkedin'];
+      socialMediaFields.forEach(field => {
+        if (updatedSettings[field] && typeof updatedSettings[field] === 'string' && updatedSettings[field].trim() !== '') {
+          // URL'nin başında http:// veya https:// yoksa https:// ekle
+          if (!updatedSettings[field].match(/^https?:\/\//)) {
+            updatedSettings[field] = `https://${updatedSettings[field]}`;
+          }
+        }
+      });
+      
+      console.log('İşlenmiş ayarlar:', updatedSettings);
+      
+      // Ayarları güncelle
+      const { data, error } = await supabase
+        .from('settings')
+        .update({ ...updatedSettings, updatedAt: new Date() })
+        .eq('id', current.id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Ayarlar güncelleme hatası:', error);
+        
+        // downloadUrl sütunu hatası için özel mesaj
+        if (error.message && error.message.includes("downloadUrl")) {
+          return res.status(500).json({ 
+            message: 'Veritabanı şema hatası: downloadUrl sütunu bulunamadı', 
+            details: 'Lütfen Supabase SQL Editor\'da şu sorguyu çalıştırın: ALTER TABLE settings ADD COLUMN IF NOT EXISTS "downloadUrl" TEXT;' 
+          });
+        }
+        
+        return res.status(500).json({ message: 'Ayarlar güncellenemedi', details: error.message });
+      }
+      
+      console.log('Ayarlar başarıyla güncellendi');
+      res.json(data);
+    } catch (error) {
+      console.error('Ayarlar güncelleme hatası (genel):', error);
+      
+      // Hata mesajında downloadUrl geçiyorsa özel mesaj göster
+      const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      if (errorMessage.includes('downloadUrl')) {
+        return res.status(500).json({ 
+          message: 'Veritabanı şema hatası: downloadUrl sütunu bulunamadı', 
+          details: 'Lütfen Supabase SQL Editor\'da şu sorguyu çalıştırın: ALTER TABLE settings ADD COLUMN IF NOT EXISTS "downloadUrl" TEXT;' 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: 'Ayarlar güncellenemedi', 
+        details: errorMessage 
+      });
+    }
+  });
+
+  // Herkese açık site ayarlarını getir
+  app.get('/api/settings', async (req: Request, res: Response) => {
+    try {
+      const { data, error } = await supabase.from('settings').select('*').single();
+      if (error) return res.status(500).json({ message: 'Failed to fetch settings', details: error.message });
+      
+      // Boolean değerleri doğru şekilde işle
+      if (data) {
+        // Eğer havale ve harici değerleri null ise, varsayılan olarak true yap
+        if (data.havale === null || data.havale === undefined) {
+          data.havale = true;
+        }
+        
+        if (data.harici === null || data.harici === undefined) {
+          data.harici = true;
+        }
+      }
+      
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch settings' });
+    }
+  });
+
+  // Frontend'den gelen hata ve network hatalarını loglayan endpoint
+  app.post('/api/log-client-error', express.json(), (req: Request, res: Response) => {
+    const logPath = path.join(process.cwd(), 'data', 'client-errors.log');
+    console.log('LOG-CLIENT-ERROR endpoint çağrıldı:', req.body); // DEBUG
+    console.log('Log dosyası yolu:', logPath); // DEBUG
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      ...req.body
+    };
+    try {
+      fs.appendFileSync(logPath, JSON.stringify(logEntry) + '\n');
+      res.status(200).json({ message: 'Error logged' });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to log error', details: (err as Error).message });
+    }
+  });
+
+  // DEBUG: Supabase ve env test endpointi
+  app.get('/api/debug/env', async (req, res) => {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_KEY ? 'OK' : 'YOK';
+    let adminTest = null;
+    let error = null;
+    try {
+      const { data, error: err } = await getAdminByUsername('admin');
+      adminTest = data;
+      if (err) error = err.message;
+    } catch (error) {
+      error = (error as Error).message;
+    }
+    res.json({
+      SUPABASE_URL: url,
+      SUPABASE_SERVICE_KEY: key,
+      adminTest,
+      error
+    });
   });
 
   const httpServer = createServer(app);
