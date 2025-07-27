@@ -1,13 +1,13 @@
 import type { Express, Request, Response } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage';
-import { insertProductSchema, insertOrderSchema, insertContactSchema } from "@shared/schema";
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage.js';
+const { insertProductSchema, insertOrderSchema, insertContactSchema } = require("../../shared/schema.runtime.js");
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import jwt from "jsonwebtoken";
-import { supabase } from "./supabaseClient";
+import { supabase } from "./supabaseClient.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
 
@@ -101,7 +101,7 @@ const adminAuth = async (req: Request, res: Response, next: any) => {
   }
 
   const admin = await getAdminByUsername(username);
-  if (!admin || admin.password !== password) {
+  if (!admin || (admin as any).password !== password) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
@@ -215,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If not found by ID, try to get by slug
       if (!product) {
         const products = await getProducts();
-        product = products.find(p => p.slug === identifier);
+        product = products.find((p: any) => p.slug === identifier);
       }
       
       if (!product) {
@@ -265,29 +265,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       // Supabase'den admin bilgilerini al
-      const { data: admin, error } = await supabase
-        .from('admins')
-        .select('*')
-        .eq('email', email)
-        .single();
+      const result: any = await getAdminByUsername('admin');
+      const data = result?.data;
+      const err = result?.error;
       
-      if (error) {
-        console.error("Admin arama hatası:", error);
+      if (err) {
+        console.error("Admin arama hatası:", err);
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      if (!admin) {
+      if (!data) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
       // Şifre kontrolü
-      if (admin.password !== password) {
+      if ((data as any).password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
       // JWT oluştur
-      const token = jwt.sign({ email: admin.email, id: admin.id }, JWT_SECRET, { expiresIn: "2h" });
-      return res.json({ message: "Login successful", token, user: { id: admin.id, email: admin.email } });
+      const token = jwt.sign({ email: (data as any).email, id: (data as any).id }, JWT_SECRET, { expiresIn: "2h" });
+      return res.json({ message: "Login successful", token, user: { id: (data as any).id, email: (data as any).email } });
     } catch (err) {
       console.error("Login error:", err);
       res.status(500).json({ message: "Server error" });
@@ -553,8 +551,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const stats = {
         totalProducts: products.length,
-        pendingOrders: orders.filter(o => o.status === 'pending').length,
-        totalSales: orders.reduce((sum, order) => {
+        pendingOrders: orders.filter((o: any) => o.status === 'pending').length,
+        totalSales: orders.reduce((sum: any, order: any) => {
           const price = typeof order.price === 'number' ? order.price : parseFloat(order.price || '0');
           return sum + (isNaN(price) ? 0 : price);
         }, 0),
@@ -722,11 +720,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let adminTest = null;
     let error = null;
     try {
-      const { data, error: err } = await getAdminByUsername('admin');
+      const result: any = await getAdminByUsername('admin');
+      const data = result?.data;
+      const err = result?.error;
       adminTest = data;
       if (err) error = err.message;
-    } catch (error) {
-      error = (error as Error).message;
+    } catch (e) {
+      error = (e as Error).message;
     }
     res.json({
       SUPABASE_URL: url,
