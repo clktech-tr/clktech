@@ -1,3 +1,3 @@
-const { settings, insertSettingsSchema, products, users, orders, contacts, admins, insertProductSchema, insertUserSchema, insertOrderSchema, insertContactSchema, insertAdminSchema } = require('./schema');
+import { settings, insertSettingsSchema, products, users, orders, contacts, admins, insertProductSchema, insertUserSchema, insertOrderSchema, insertContactSchema, insertAdminSchema } from './schema.js';
 
-module.exports = { settings, insertSettingsSchema, products, users, orders, contacts, admins, insertProductSchema, insertUserSchema, insertOrderSchema, insertContactSchema, insertAdminSchema };
+export { settings, insertSettingsSchema, products, users, orders, contacts, admins, insertProductSchema, insertUserSchema, insertOrderSchema, insertContactSchema, insertAdminSchema };
