@@ -26,14 +26,12 @@ try {
   }
   
   // Vite ile client build
-  console.log('Client build başlatılıyor...');
-  execSync('npx vite build', { stdio: 'inherit' });
-  console.log('Client build tamamlandı.');
-  
-  // Server build
-  console.log('Server build başlatılıyor...');
-  execSync('npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist', { stdio: 'inherit' });
-  console.log('Server build tamamlandı.');
+console.log('Client build başlatılıyor...');
+execSync('npx vite build', { stdio: 'inherit' });
+console.log('Client build tamamlandı.');
+
+// Server build artık Render üzerinde yapılacak
+console.log('Server build atlanıyor, Render üzerinde yapılacak...');
   
   // Dist klasörünün içeriğini kontrol et
   const distFiles = fs.readdirSync(path.join(__dirname, 'dist'));

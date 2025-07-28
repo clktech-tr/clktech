@@ -187,6 +187,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve download files
   app.use("/downloads", express.static(path.join(process.cwd(), "public", "downloads")));
 
+  // Health check endpoint for Render
+  app.get("/api/health", (req: Request, res: Response) => {
+    res.status(200).json({ status: "ok", message: "Server is running" });
+  });
+
   // Public API routes
   
   // Get all products
