@@ -51,168 +51,104 @@ try {
   }
   
   // Vite ile client build
-console.log('Client build başlatılıyor...');
-// Önce gerekli paketlerin yüklendiğinden emin ol
-console.log('Dev dependencies yükleniyor...');
-execSync('npm install --only=dev', { stdio: 'inherit' });
-// Vite ve diğer gerekli paketleri açıkça yükle
-execSync('npm install vite@5.4.19 autoprefixer@10.4.16 postcss@8.5.6 tailwindcss@3.4.17 @vitejs/plugin-react @replit/vite-plugin-runtime-error-modal @replit/vite-plugin-cartographer --no-save', { stdio: 'inherit' });
-// React ve diğer gerekli paketleri yükle
-execSync('npm install react react-dom wouter @tanstack/react-query --no-save', { stdio: 'inherit' });
+  console.log('Client build başlatılıyor...');
+  
+  // Önce gerekli paketlerin yüklendiğinden emin ol
+  console.log('Dev dependencies yükleniyor...');
+  execSync('npm install --only=dev', { stdio: 'inherit' });
+  
+  // Vite ve diğer gerekli paketleri açıkça yükle
+  console.log('Vite ve gerekli paketler yükleniyor...');
+  execSync('npm install vite@5.4.19 autoprefixer@10.4.16 postcss@8.5.6 tailwindcss@3.4.17 @vitejs/plugin-react @replit/vite-plugin-runtime-error-modal @replit/vite-plugin-cartographer --no-save', { stdio: 'inherit' });
+  
+  // React ve diğer gerekli paketleri yükle
+  console.log('React ve diğer gerekli paketler yükleniyor...');
+  execSync('npm install react react-dom wouter @tanstack/react-query --no-save', { stdio: 'inherit' });
 
-// Client dizinindeki bağımlılıkları yükle
-console.log('Client dizinindeki bağımlılıklar yükleniyor...');
-execSync('npm install', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-// Autoprefixer ve diğer gerekli paketleri açıkça yükle
-console.log('Gerekli CSS paketleri yükleniyor...');
-execSync('npm install autoprefixer tailwindcss postcss --save-dev', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-console.log('Client bağımlılıkları yüklendi.');
+  // Client dizinindeki bağımlılıkları yükle
+  console.log('Client dizinindeki bağımlılıklar yükleniyor...');
+  execSync('npm install', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+  
+  // Autoprefixer ve diğer gerekli paketleri açıkça yükle
+  console.log('Gerekli CSS paketleri yükleniyor...');
+  execSync('npm install autoprefixer tailwindcss postcss --save-dev', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+  console.log('Client bağımlılıkları yüklendi.');
 
-// Vite config dosyasını kontrol et
-if (fs.existsSync(path.join(__dirname, 'client', 'vite.config.js'))) {
-  console.log('client/vite.config.js dosyası mevcut');
-} else if (fs.existsSync(path.join(__dirname, 'vite.config.ts'))) {
-  console.log('vite.config.ts dosyası mevcut');
-  // client dizinine vite.config.js dosyasını kopyala
-  console.log('vite.config.ts dosyası client dizinine vite.config.js olarak kopyalanıyor...');
-  // Vite.config.ts içeriğini oku ve client dizinine vite.config.js olarak yaz
-  const viteConfigContent = fs.readFileSync(path.join(__dirname, 'vite.config.ts'), 'utf8');
-  fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.js'), viteConfigContent);
-  console.log('vite.config.js dosyası client dizinine kopyalandı');
-} else {
-  console.log('Hiçbir vite.config dosyası bulunamadı');
-}
+  // Vite config dosyasını kontrol et
+  if (fs.existsSync(path.join(__dirname, 'client', 'vite.config.js'))) {
+    console.log('client/vite.config.js dosyası mevcut');
+  } else if (fs.existsSync(path.join(__dirname, 'vite.config.ts'))) {
+    console.log('vite.config.ts dosyası mevcut');
+    // client dizinine vite.config.js dosyasını kopyala
+    console.log('vite.config.ts dosyası client dizinine vite.config.js olarak kopyalanıyor...');
+    // Vite.config.ts içeriğini oku ve client dizinine vite.config.js olarak yaz
+    const viteConfigContent = fs.readFileSync(path.join(__dirname, 'vite.config.ts'), 'utf8');
+    fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.js'), viteConfigContent);
+    console.log('vite.config.js dosyası client dizinine kopyalandı');
+  } else {
+    console.log('Hiçbir vite.config dosyası bulunamadı');
+  }
 
-console.log('Build başlatılıyor...');
-try {
-  console.log('Vite build işlemi başlatılıyor...');
+  // Build klasörlerini hazırla
+  console.log('Build klasörleri hazırlanıyor...');
   
   // dist klasörünü oluştur (gerekirse)
   if (!fs.existsSync(path.join(__dirname, 'dist'))) {
     fs.mkdirSync(path.join(__dirname, 'dist'));
+    console.log('dist klasörü oluşturuldu');
   }
   
   // dist/public klasörünü oluştur (gerekirse)
   if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
-    fs.mkdirSync(path.join(__dirname, 'dist', 'public'));
-  }
-  
-  // Vite build komutunu çalıştır
-  console.log('Vite build komutu çalıştırılıyor...');
-  execSync('npm run build:frontend', { stdio: 'inherit' });
-  
-  // Dist klasörünün içeriğini kontrol et
-  if (!fs.existsSync(path.join(__dirname, 'dist'))) {
-    console.log('dist klasörü oluşturuluyor...');
-    fs.mkdirSync(path.join(__dirname, 'dist'));
-  }
-  
-  if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
-    console.log('dist/public klasörü oluşturuluyor...');
     fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
+    console.log('dist/public klasörü oluşturuldu');
   }
   
-  // Client build işlemini başlat
+  // Client build işlemini gerçekleştir
   console.log('Client build işlemi başlatılıyor...');
-  
   try {
-    // Vercel ortamında çalışacak şekilde client build işlemini yönet
-    console.log('Client build işlemi başlatılıyor...');
+    // Client dizininde build işlemini gerçekleştir
+    execSync('npm run build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    console.log('Client build işlemi tamamlandı');
     
-    // Dist klasörünü oluştur
-    if (!fs.existsSync(path.join(__dirname, 'dist'))) {
-      console.log('dist klasörü oluşturuluyor...');
-      fs.mkdirSync(path.join(__dirname, 'dist'));
+    // Client build çıktısını dist/public klasörüne kopyala
+    console.log('Client build çıktısı dist/public klasörüne kopyalanıyor...');
+    if (fs.existsSync(path.join(__dirname, 'client', 'dist'))) {
+      // client/dist içindeki tüm dosyaları dist/public'e kopyala
+      const files = fs.readdirSync(path.join(__dirname, 'client', 'dist'));
+      for (const file of files) {
+        const srcPath = path.join(__dirname, 'client', 'dist', file);
+        const destPath = path.join(__dirname, 'dist', 'public', file);
+        if (fs.statSync(srcPath).isDirectory()) {
+          // Dizin ise recursive kopyala
+          fs.cpSync(srcPath, destPath, { recursive: true });
+        } else {
+          // Dosya ise kopyala
+          fs.copyFileSync(srcPath, destPath);
+        }
+      }
+      console.log('Build çıktısı başarıyla kopyalandı');
+    } else {
+      throw new Error('client/dist dizini bulunamadı');
     }
-    
-    // dist/public klasörünü oluştur
-    if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
-      console.log('dist/public klasörü oluşturuluyor...');
-      fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
-    }
-    
-    // dist/public/assets klasörünü oluştur
-    if (!fs.existsSync(path.join(__dirname, 'dist', 'public', 'assets'))) {
-      console.log('dist/public/assets klasörü oluşturuluyor...');
-      fs.mkdirSync(path.join(__dirname, 'dist', 'public', 'assets'), { recursive: true });
-    }
-    
-    // Gerçek build işlemi yapıldığı için HTML dosyası oluşturmaya gerek yok
-    console.log('Build işlemi tamamlandı, HTML dosyaları oluşturuldu.');
-    
-    // Gerçek build işlemi yapıldığı için CSS dosyası oluşturmaya gerek yok
-    console.log('Build işlemi tamamlandı, CSS dosyaları oluşturuldu.');
-    
-      // Gerçek build işlemi yapıldığı için JavaScript dosyası oluşturmaya gerek yok
-    console.log('Build işlemi tamamlandı, JavaScript dosyaları oluşturuldu.');
-    
-    console.log('Client build tamamlandı.');
     
     // Build çıktısının varlığını kontrol et
     if (fs.existsSync(path.join(__dirname, 'dist', 'public', 'index.html'))) {
-      console.log('Client build başarıyla tamamlandı.');
+      console.log('Client build başarıyla tamamlandı');
       
       // Dosyaları listele
       const publicFiles = fs.readdirSync(path.join(__dirname, 'dist', 'public'));
       console.log('Build çıktısı dosyaları:', publicFiles);
     } else {
-      console.error('Client build çıktısı oluşturulamadı!');
       throw new Error('Client build çıktısı oluşturulamadı!');
     }
   } catch (buildError) {
-    console.error('Client build işlemi başarısız:', buildError);
-    
-    // Build başarısız olursa tekrar dene
-    console.log('Build başarısız oldu, farklı bir yöntemle tekrar deneniyor...');
-    
-    // dist/public dizinini oluştur
-    if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
-      console.log('dist/public dizini oluşturuluyor...');
-      fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
-    }
-    
-    try {
-      // Client dizininde doğrudan build komutunu çalıştır
-      console.log('Client dizininde build komutu çalıştırılıyor...');
-      execSync('npm run build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-      
-      // Build çıktısını dist/public klasörüne kopyala
-      console.log('Build çıktısı dist/public klasörüne kopyalanıyor...');
-      if (fs.existsSync(path.join(__dirname, 'client', 'dist'))) {
-        // client/dist içindeki tüm dosyaları dist/public'e kopyala
-        const files = fs.readdirSync(path.join(__dirname, 'client', 'dist'));
-        for (const file of files) {
-          const srcPath = path.join(__dirname, 'client', 'dist', file);
-          const destPath = path.join(__dirname, 'dist', 'public', file);
-          if (fs.statSync(srcPath).isDirectory()) {
-            // Dizin ise recursive kopyala
-            fs.cpSync(srcPath, destPath, { recursive: true });
-          } else {
-            // Dosya ise kopyala
-            fs.copyFileSync(srcPath, destPath);
-          }
-        }
-        console.log('Build çıktısı başarıyla kopyalandı.');
-      } else {
-        throw new Error('client/dist dizini bulunamadı');
-      }
-    } catch (retryError) {
-      console.error('İkinci build denemesi de başarısız:', retryError);
-      throw retryError;
-    }
+    console.error('Client build hatası:', buildError);
+    throw buildError;
   }
-  
-  console.log('Build işlemi tamamlandı.');
 
-  
-  console.log('Client build tamamlandı.');
-} catch (error) {
-  console.error('Client build hatası:', error);
-  throw error;
-}
-
-// Server build artık Render üzerinde yapılacak
-console.log('Server build atlanıyor, Render üzerinde yapılacak...');
+  // Server build artık Render üzerinde yapılacak
+  console.log('Server build atlanıyor, Render üzerinde yapılacak...');
   
   // Dist klasörünün içeriğini kontrol et
   const distFiles = fs.readdirSync(path.join(__dirname, 'dist'));
