@@ -91,11 +91,12 @@
   }
   
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary/90;
+    @apply bg-primary text-white;
   }
   
   .btn-primary:hover {
-    @apply -translate-y-1 shadow-lg;
+    @apply -translate-y-1 shadow-lg bg-primary;
+    opacity: 0.9;
     box-shadow: 0 8px 25px hsl(220, 88%, 56%, 0.3);
   }
   
