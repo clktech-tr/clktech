@@ -11,13 +11,13 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(path.dirname(new URL(import.meta.url).pathname), "src"),
-      "@assets": path.resolve(path.dirname(new URL(import.meta.url).pathname), "../attached_assets"),
-      "@shared": path.resolve(path.dirname(new URL(import.meta.url).pathname), "../shared"),
+      "@": path.resolve("./src"),
+      "@assets": path.resolve("../attached_assets"),
+      "@shared": path.resolve("../shared"),
     },
   },
   build: {
-    outDir: path.resolve(path.dirname(new URL(import.meta.url).pathname), "../dist/public"),
+    outDir: path.resolve("../dist/public"),
     emptyOutDir: true,
-  },
-};
+  }
+});
