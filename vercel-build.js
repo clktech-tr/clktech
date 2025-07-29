@@ -68,6 +68,9 @@ try {
   // Client dizinindeki bağımlılıkları yükle
   console.log('Client dizinindeki bağımlılıklar yükleniyor...');
   execSync('npm install', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+  // Vite'ı açıkça yükle
+  console.log('Vite açıkça yükleniyor...');
+  execSync('npm install vite@5.4.19 --no-save', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
   
   // Autoprefixer ve diğer gerekli paketleri açıkça yükle
   console.log('Gerekli CSS paketleri yükleniyor...');
@@ -108,7 +111,8 @@ try {
   console.log('Client build işlemi başlatılıyor...');
   try {
     // Client dizininde build işlemini gerçekleştir
-    execSync('npm run build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    console.log('Vite build komutu doğrudan çalıştırılıyor...');
+    execSync('npx vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
     console.log('Client build işlemi tamamlandı');
     
     // Client build çıktısını dist/public klasörüne kopyala
