@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: path.resolve(__dirname, "../dist/public"),
+    outDir: path.resolve(path.dirname(new URL(import.meta.url).pathname), "../dist/public"),
     emptyOutDir: true,
   },
 };
