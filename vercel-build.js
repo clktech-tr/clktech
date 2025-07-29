@@ -57,6 +57,8 @@ console.log('Dev dependencies yükleniyor...');
 execSync('npm install --only=dev', { stdio: 'inherit' });
 // Vite ve diğer gerekli paketleri açıkça yükle
 execSync('npm install vite@5.4.19 autoprefixer@10.4.16 postcss@8.5.6 tailwindcss@3.4.17 @vitejs/plugin-react @replit/vite-plugin-runtime-error-modal @replit/vite-plugin-cartographer --no-save', { stdio: 'inherit' });
+// React ve diğer gerekli paketleri yükle
+execSync('npm install react react-dom wouter @tanstack/react-query --no-save', { stdio: 'inherit' });
 
 // Client dizinindeki bağımlılıkları yükle
 console.log('Client dizinindeki bağımlılıklar yükleniyor...');
@@ -83,7 +85,7 @@ if (fs.existsSync(path.join(__dirname, 'client', 'vite.config.js'))) {
 
 console.log('Build başlatılıyor...');
 try {
-  console.log('Manuel build işlemi başlatılıyor...');
+  console.log('Vite build işlemi başlatılıyor...');
   
   // dist klasörünü oluştur (gerekirse)
   if (!fs.existsSync(path.join(__dirname, 'dist'))) {
@@ -95,8 +97,9 @@ try {
     fs.mkdirSync(path.join(__dirname, 'dist', 'public'));
   }
   
-  // Client build çıktısını kopyala
-  console.log('Client build çıktısı dist/public klasörüne kopyalanıyor...');
+  // Vite build komutunu çalıştır
+  console.log('Vite build komutu çalıştırılıyor...');
+  execSync('npm run build:frontend', { stdio: 'inherit' });
   
   // Dist klasörünün içeriğini kontrol et
   if (!fs.existsSync(path.join(__dirname, 'dist'))) {
@@ -134,69 +137,14 @@ try {
       fs.mkdirSync(path.join(__dirname, 'dist', 'public', 'assets'), { recursive: true });
     }
     
-    // index.html dosyasını oluştur
-    const indexHtmlPath = path.join(__dirname, 'dist', 'public', 'index.html');
-    console.log('index.html dosyası oluşturuluyor...');
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <script type="module" crossorigin src="/assets/index-CwjrezuF.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BfcrtWBf.css">
-    <title>CLK Tech</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>`;
-    fs.writeFileSync(indexHtmlPath, htmlContent);
+    // Gerçek build işlemi yapıldığı için HTML dosyası oluşturmaya gerek yok
+    console.log('Build işlemi tamamlandı, HTML dosyaları oluşturuldu.');
     
-    // CSS dosyasını oluştur
-    console.log('CSS dosyası oluşturuluyor...');
-    const cssContent = `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}`;
-    fs.writeFileSync(path.join(__dirname, 'dist', 'public', 'assets', 'index-BfcrtWBf.css'), cssContent);
+    // Gerçek build işlemi yapıldığı için CSS dosyası oluşturmaya gerek yok
+    console.log('Build işlemi tamamlandı, CSS dosyaları oluşturuldu.');
     
-      // JavaScript dosyasını oluştur
-    console.log('JavaScript dosyası oluşturuluyor...');
-    const jsContent = `console.log('CLK Tech - Uygulama yükleniyor...');
-
-document.addEventListener('DOMContentLoaded', () => {
-  const root = document.getElementById('root');
-  
-  root.innerHTML = \`
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #f3f4f6;">
-      <div style="padding: 2rem; background-color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 28rem; width: 100%; text-align: center;">
-        <div style="margin-bottom: 1.5rem;">
-          <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="45" fill="#1f2937" />
-            <text x="50" y="65" font-size="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold">CLK</text>
-          </svg>
-        </div>
-        <h1 style="font-size: 1.875rem; font-weight: 700; color: #1f2937; margin-bottom: 1rem;">CLK Tech</h1>
-        <p style="font-size: 1.125rem; color: #4b5563; margin-bottom: 1.5rem;">Sitemiz yapım aşamasındadır. Çok yakında hizmetinizdeyiz.</p>
-      </div>
-    </div>
-  \`;
-});
-`;
-    fs.writeFileSync(path.join(__dirname, 'dist', 'public', 'assets', 'index-CwjrezuF.js'), jsContent);
+      // Gerçek build işlemi yapıldığı için JavaScript dosyası oluşturmaya gerek yok
+    console.log('Build işlemi tamamlandı, JavaScript dosyaları oluşturuldu.');
     
     console.log('Client build tamamlandı.');
     
@@ -214,8 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (buildError) {
     console.error('Client build işlemi başarısız:', buildError);
     
-    // Build başarısız olursa placeholder oluştur
-    console.log('Build başarısız oldu, placeholder oluşturuluyor...');
+    // Build başarısız olursa tekrar dene
+    console.log('Build başarısız oldu, farklı bir yöntemle tekrar deneniyor...');
     
     // dist/public dizinini oluştur
     if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
@@ -223,25 +171,35 @@ document.addEventListener('DOMContentLoaded', () => {
       fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
     }
     
-    // Placeholder index.html dosyası oluştur
-    const indexHtmlPath = path.join(__dirname, 'dist', 'public', 'index.html');
-    console.log('Placeholder index.html dosyası oluşturuluyor...');
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CLK Tech</title>
-</head>
-<body>
-  <h1>CLK Tech</h1>
-  <p>Sitemiz yapım aşamasındadır. Çok yakında hizmetinizdeyiz.</p>
-</body>
-</html>
-`;
-    fs.writeFileSync(indexHtmlPath, htmlContent);
-    console.log('Placeholder oluşturuldu.');
+    try {
+      // Client dizininde doğrudan build komutunu çalıştır
+      console.log('Client dizininde build komutu çalıştırılıyor...');
+      execSync('npm run build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+      
+      // Build çıktısını dist/public klasörüne kopyala
+      console.log('Build çıktısı dist/public klasörüne kopyalanıyor...');
+      if (fs.existsSync(path.join(__dirname, 'client', 'dist'))) {
+        // client/dist içindeki tüm dosyaları dist/public'e kopyala
+        const files = fs.readdirSync(path.join(__dirname, 'client', 'dist'));
+        for (const file of files) {
+          const srcPath = path.join(__dirname, 'client', 'dist', file);
+          const destPath = path.join(__dirname, 'dist', 'public', file);
+          if (fs.statSync(srcPath).isDirectory()) {
+            // Dizin ise recursive kopyala
+            fs.cpSync(srcPath, destPath, { recursive: true });
+          } else {
+            // Dosya ise kopyala
+            fs.copyFileSync(srcPath, destPath);
+          }
+        }
+        console.log('Build çıktısı başarıyla kopyalandı.');
+      } else {
+        throw new Error('client/dist dizini bulunamadı');
+      }
+    } catch (retryError) {
+      console.error('İkinci build denemesi de başarısız:', retryError);
+      throw retryError;
+    }
   }
   
   console.log('Build işlemi tamamlandı.');
