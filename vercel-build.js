@@ -78,16 +78,16 @@ try {
   console.log('Client bağımlılıkları yüklendi.');
 
   // Vite config dosyasını kontrol et
-  if (fs.existsSync(path.join(__dirname, 'client', 'vite.config.js'))) {
-    console.log('client/vite.config.js dosyası mevcut');
+  if (fs.existsSync(path.join(__dirname, 'client', 'vite.config.mjs'))) {
+    console.log('client/vite.config.mjs dosyası mevcut');
   } else if (fs.existsSync(path.join(__dirname, 'vite.config.ts'))) {
     console.log('vite.config.ts dosyası mevcut');
-    // client dizinine vite.config.js dosyasını kopyala
-    console.log('vite.config.ts dosyası client dizinine vite.config.js olarak kopyalanıyor...');
-    // Vite.config.ts içeriğini oku ve client dizinine vite.config.js olarak yaz
+    // client dizinine vite.config.mjs dosyasını kopyala
+    console.log('vite.config.ts dosyası client dizinine vite.config.mjs olarak kopyalanıyor...');
+    // Vite.config.ts içeriğini oku ve client dizinine vite.config.mjs olarak yaz
     const viteConfigContent = fs.readFileSync(path.join(__dirname, 'vite.config.ts'), 'utf8');
-    fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.js'), viteConfigContent);
-    console.log('vite.config.js dosyası client dizinine kopyalandı');
+    fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), viteConfigContent);
+    console.log('vite.config.mjs dosyası client dizinine kopyalandı');
   } else {
     console.log('Hiçbir vite.config dosyası bulunamadı');
   }
