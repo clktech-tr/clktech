@@ -59,7 +59,8 @@ try {
   
   // Vite ve diğer gerekli paketleri açıkça yükle
   console.log('Vite ve gerekli paketler yükleniyor...');
-  execSync('npm install vite@5.4.19 autoprefixer@10.4.16 postcss@8.5.6 tailwindcss@3.4.17 @vitejs/plugin-react @replit/vite-plugin-runtime-error-modal @replit/vite-plugin-cartographer --no-save', { stdio: 'inherit' });
+  execSync('npm install -g vite@5.4.19', { stdio: 'inherit' });
+  execSync('npm install vite@5.4.19 autoprefixer@10.4.16 postcss@8.5.6 tailwindcss@3.4.17 @vitejs/plugin-react @replit/vite-plugin-runtime-error-modal @replit/vite-plugin-cartographer --save', { stdio: 'inherit' });
   
   // React ve diğer gerekli paketleri yükle
   console.log('React ve diğer gerekli paketler yükleniyor...');
@@ -70,7 +71,10 @@ try {
   execSync('npm install', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
   // Vite'ı açıkça yükle
   console.log('Vite açıkça yükleniyor...');
-  execSync('npm install vite@5.4.19 --no-save', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+  execSync('npm install vite@5.4.19 --save', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+  // Vite'ı node_modules/.bin dizinine kopyala
+  console.log('Vite binary dosyasını kopyalıyoruz...');
+  execSync('npm link vite', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
   
   // Autoprefixer ve diğer gerekli paketleri açıkça yükle
   console.log('Gerekli CSS paketleri yükleniyor...');
@@ -112,7 +116,14 @@ try {
   try {
     // Client dizininde build işlemini gerçekleştir
     console.log('Vite build komutu doğrudan çalıştırılıyor...');
-    execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    // Önce node_modules/.bin/vite dosyasının varlığını kontrol et
+    if (fs.existsSync(path.join(__dirname, 'client', 'node_modules', '.bin', 'vite'))) {
+      console.log('node_modules/.bin/vite bulundu, doğrudan çalıştırılıyor...');
+      execSync('node_modules/.bin/vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    } else {
+      console.log('node_modules/.bin/vite bulunamadı, npx ile çalıştırılıyor...');
+      execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    }
     console.log('Client build işlemi tamamlandı');
     
     // Client build çıktısını dist/public klasörüne kopyala
