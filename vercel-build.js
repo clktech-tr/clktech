@@ -61,6 +61,9 @@ try {
   console.log('Vite ve gerekli paketler yükleniyor...');
   execSync('npm install -g vite@5.4.19', { stdio: 'inherit' });
   execSync('npm install vite@5.4.19 autoprefixer@10.4.16 postcss@8.5.6 tailwindcss@3.4.17 @vitejs/plugin-react @replit/vite-plugin-runtime-error-modal @replit/vite-plugin-cartographer --save', { stdio: 'inherit' });
+  // Vite'ı global olarak bağla
+  console.log('Vite global olarak bağlanıyor...');
+  execSync('npm link vite', { stdio: 'inherit' });
   
   // React ve diğer gerekli paketleri yükle
   console.log('React ve diğer gerekli paketler yükleniyor...');
@@ -76,6 +79,16 @@ try {
   console.log('Vite binary dosyasını kopyalıyoruz...');
   execSync('npm link vite', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
   
+  // Vite'ın doğru yüklendiğini kontrol et
+  console.log('Vite kurulumunu kontrol ediyoruz...');
+  try {
+    const vitePackageJson = fs.readFileSync(path.join(__dirname, 'client', 'node_modules', 'vite', 'package.json'), 'utf8');
+    console.log('Vite package.json bulundu:', JSON.parse(vitePackageJson).version);
+  } catch (err) {
+    console.error('Vite package.json bulunamadı, manuel olarak yüklemeyi deniyoruz...');
+    execSync('npm install vite@5.4.19 --no-save', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+  }
+  
   // Autoprefixer ve diğer gerekli paketleri açıkça yükle
   console.log('Gerekli CSS paketleri yükleniyor...');
   execSync('npm install autoprefixer tailwindcss postcss --save-dev', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
@@ -84,14 +97,42 @@ try {
   // Vite config dosyasını kontrol et
   if (fs.existsSync(path.join(__dirname, 'client', 'vite.config.mjs'))) {
     console.log('client/vite.config.mjs dosyası mevcut');
+    
+    // vite.config.mjs dosyasını yedekle
+    fs.copyFileSync(
+      path.join(__dirname, 'client', 'vite.config.mjs'), 
+      path.join(__dirname, 'client', 'vite.config.mjs.backup')
+    );
+    console.log('vite.config.mjs dosyası yedeklendi');
+    
+    // vite.config.mjs dosyasını oku
+    const viteConfigContent = fs.readFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), 'utf8');
+    
+    // İlk satırı değiştir (vite import'unu düzelt)
+    const patchedContent = viteConfigContent.replace(
+      "import { defineConfig } from 'vite';", 
+      "import { defineConfig } from './node_modules/vite/index.js';"
+    );
+    
+    // Düzeltilmiş içeriği yaz
+    fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), patchedContent);
+    console.log('vite.config.mjs dosyası düzeltildi');
+    
   } else if (fs.existsSync(path.join(__dirname, 'vite.config.ts'))) {
     console.log('vite.config.ts dosyası mevcut');
     // client dizinine vite.config.mjs dosyasını kopyala
     console.log('vite.config.ts dosyası client dizinine vite.config.mjs olarak kopyalanıyor...');
     // Vite.config.ts içeriğini oku ve client dizinine vite.config.mjs olarak yaz
     const viteConfigContent = fs.readFileSync(path.join(__dirname, 'vite.config.ts'), 'utf8');
-    fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), viteConfigContent);
-    console.log('vite.config.mjs dosyası client dizinine kopyalandı');
+    
+    // İlk satırı değiştir (vite import'unu düzelt)
+    const patchedContent = viteConfigContent.replace(
+      "import { defineConfig } from 'vite';", 
+      "import { defineConfig } from './node_modules/vite/index.js';"
+    );
+    
+    fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), patchedContent);
+    console.log('vite.config.mjs dosyası client dizinine kopyalandı ve düzeltildi');
   } else {
     console.log('Hiçbir vite.config dosyası bulunamadı');
   }
@@ -116,12 +157,43 @@ try {
   try {
     // Client dizininde build işlemini gerçekleştir
     console.log('Vite build komutu doğrudan çalıştırılıyor...');
-    // Önce node_modules/.bin/vite dosyasının varlığını kontrol et
-    if (fs.existsSync(path.join(__dirname, 'client', 'node_modules', '.bin', 'vite'))) {
-      console.log('node_modules/.bin/vite bulundu, doğrudan çalıştırılıyor...');
-      execSync('node_modules/.bin/vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-    } else {
-      console.log('node_modules/.bin/vite bulunamadı, npx ile çalıştırılıyor...');
+    // Vite'ı doğrudan node_modules'dan çalıştırmayı dene
+    try {
+      console.log('Vite modülünü doğrudan require ile yüklemeyi deniyoruz...');
+      // Vite'ı client dizinine kopyala (Windows uyumlu)
+      if (process.platform === 'win32') {
+        // Windows için xcopy kullan
+        execSync('xcopy /E /I /Y node_modules\\vite client\\node_modules\\vite', { stdio: 'inherit' });
+      } else {
+        // Unix/Linux için cp kullan
+        execSync('cp -r node_modules/vite client/node_modules/', { stdio: 'inherit' });
+      }
+      console.log('Vite modülü client/node_modules dizinine kopyalandı');
+      
+      // Vite'ı doğrudan çalıştır
+      console.log('Vite build komutu çalıştırılıyor...');
+      
+      // Vite'ı önceden yükleyen bir wrapper script oluştur
+      const wrapperScript = `
+        // Vite'ı önceden yükle
+        import * as vite from './node_modules/vite/index.js';
+        // Vite'ı global olarak tanımla
+        globalThis.vite = vite;
+        // Vite build komutunu çalıştır
+        import('./node_modules/vite/bin/vite.js');
+      `;
+      
+      // Wrapper script'i geçici bir dosyaya yaz
+      fs.writeFileSync(path.join(__dirname, 'client', 'vite-wrapper.mjs'), wrapperScript);
+      console.log('Vite wrapper script oluşturuldu');
+      
+      // Wrapper script'i çalıştır
+      execSync('node vite-wrapper.mjs build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    } catch (viteError) {
+      console.log('Doğrudan vite çalıştırma hatası:', viteError);
+      console.log('Alternatif yöntemler deneniyor...');
+      
+      // Alternatif yöntem: npx ile çalıştır
       execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
     }
     console.log('Client build işlemi tamamlandı');
