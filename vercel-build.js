@@ -37,8 +37,8 @@ try {
           process.env[key.trim()] = value.trim();
           console.log(`Ortam değişkeni ayarlandı: ${key.trim()}`);
         }
-      }
-    }
+           }
+         }
   } else {
     console.log('.env.vercel dosyası bulunamadı');
   }
@@ -296,35 +296,35 @@ try {
          
          // Alternatif yöntem 2: Doğrudan npx ile Vite'ı çalıştır - Vercel ortamında en güvenilir yöntem
          console.log('Alternatif yöntem 2: npx ile Vite build komutunu çalıştırıyoruz...');
-      try {
-        // Önce node_modules/.bin içindeki vite'ı kontrol et
-        const binPath = path.join(__dirname, 'client', 'node_modules', '.bin', 'vite');
-        if (fs.existsSync(binPath)) {
-          console.log('Vite binary bulundu, doğrudan çalıştırılıyor...');
-          // Windows ve Unix/Linux için uyumlu çalıştırma
-          if (process.platform === 'win32') {
-            execSync(`"${binPath}" build`, { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+         try {
+          // Önce node_modules/.bin içindeki vite'ı kontrol et
+          const binPath = path.join(__dirname, 'client', 'node_modules', '.bin', 'vite');
+          if (fs.existsSync(binPath)) {
+            console.log('Vite binary bulundu, doğrudan çalıştırılıyor...');
+            // Windows ve Unix/Linux için uyumlu çalıştırma
+            if (process.platform === 'win32') {
+              execSync(`"${binPath}" build`, { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+            } else {
+              execSync(`${binPath} build`, { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+            }
           } else {
-            execSync(`${binPath} build`, { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+            console.log('Vite binary bulunamadı, npx ile çalıştırılıyor...');
+            // npx ile belirli bir versiyonu çalıştır
+            execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
           }
-        } else {
-          console.log('Vite binary bulunamadı, npx ile çalıştırılıyor...');
-          // npx ile belirli bir versiyonu çalıştır
-          execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-        }
-      } catch (buildError) {
-        console.log('Vite build hatası:', buildError.message);
-        
-        // Son çare: Basit bir HTML dosyası oluştur
-        console.log('Alternatif yöntem: Basit bir HTML dosyası oluşturuluyor...');
-        try {
-          // dist/public klasörünü oluştur
-          if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
-            fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
-          }
-          
-          // Basit bir index.html dosyası oluştur
-          const simpleHtml = `<!DOCTYPE html>
+         } catch (buildError) {
+            console.log('Vite build hatası:', buildError.message);
+            
+            // Son çare: Basit bir HTML dosyası oluştur
+            console.log('Alternatif yöntem: Basit bir HTML dosyası oluşturuluyor...');
+            try {
+              // dist/public klasörünü oluştur
+              if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
+                fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
+              }
+              
+              // Basit bir index.html dosyası oluştur
+              const simpleHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -342,14 +342,14 @@ try {
 </body>
 </html>`;
           
-          fs.writeFileSync(path.join(__dirname, 'dist', 'public', 'index.html'), simpleHtml);
-          console.log('Basit HTML dosyası oluşturuldu');
-        } catch (fallbackError) {
-          console.log('Basit HTML oluşturma hatası:', fallbackError.message);
-          throw new Error('Hiçbir alternatif yöntem başarılı olmadı');
-        }
-      }
-    }
+               fs.writeFileSync(path.join(__dirname, 'dist', 'public', 'index.html'), simpleHtml);
+               console.log('Basit HTML dosyası oluşturuldu');
+             } catch (fallbackError) {
+               console.log('Basit HTML oluşturma hatası:', fallbackError.message);
+               throw new Error('Hiçbir alternatif yöntem başarılı olmadı');
+             }
+           }
+         }
     console.log('Client build işlemi tamamlandı');
     
     // Client build çıktısını dist/public klasörüne kopyala
