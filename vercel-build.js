@@ -112,7 +112,7 @@ try {
   try {
     // Client dizininde build işlemini gerçekleştir
     console.log('Vite build komutu doğrudan çalıştırılıyor...');
-    execSync('npx vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+    execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
     console.log('Client build işlemi tamamlandı');
     
     // Client build çıktısını dist/public klasörüne kopyala
