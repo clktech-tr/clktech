@@ -108,11 +108,10 @@ try {
     // vite.config.mjs dosyasını oku
     const viteConfigContent = fs.readFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), 'utf8');
     
-    // İlk satırı değiştir (vite import'unu düzelt)
-    const patchedContent = viteConfigContent.replace(
-      "import { defineConfig } from 'vite';", 
-      "import { defineConfig } from './node_modules/vite/index.js';"
-    );
+    // İlk satırı değiştirme - orijinal import'u koru
+    // Vite modülünü doğrudan kullanmak daha güvenli
+    const patchedContent = viteConfigContent;
+    console.log('vite.config.mjs dosyası orijinal import ile kullanılacak');
     
     // Düzeltilmiş içeriği yaz
     fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), patchedContent);
@@ -125,11 +124,10 @@ try {
     // Vite.config.ts içeriğini oku ve client dizinine vite.config.mjs olarak yaz
     const viteConfigContent = fs.readFileSync(path.join(__dirname, 'vite.config.ts'), 'utf8');
     
-    // İlk satırı değiştir (vite import'unu düzelt)
-    const patchedContent = viteConfigContent.replace(
-      "import { defineConfig } from 'vite';", 
-      "import { defineConfig } from './node_modules/vite/index.js';"
-    );
+    // İlk satırı değiştirme - orijinal import'u koru
+    // Vite modülünü doğrudan kullanmak daha güvenli
+    const patchedContent = viteConfigContent;
+    console.log('vite.config.mjs dosyası orijinal import ile kullanılacak');
     
     fs.writeFileSync(path.join(__dirname, 'client', 'vite.config.mjs'), patchedContent);
     console.log('vite.config.mjs dosyası client dizinine kopyalandı ve düzeltildi');
@@ -160,27 +158,58 @@ try {
     // Vite'ı doğrudan node_modules'dan çalıştırmayı dene
     try {
       console.log('Vite modülünü doğrudan require ile yüklemeyi deniyoruz...');
-      // Vite'ı client dizinine kopyala (Windows uyumlu)
-      if (process.platform === 'win32') {
-        // Windows için xcopy kullan
-        execSync('xcopy /E /I /Y node_modules\\vite client\\node_modules\\vite', { stdio: 'inherit' });
-      } else {
-        // Unix/Linux için cp kullan
-        execSync('cp -r node_modules/vite client/node_modules/', { stdio: 'inherit' });
+      // Vite'ı client dizinine kopyala (Node.js fs modülü ile platform bağımsız)
+      console.log('Vite modülünü fs modülü ile kopyalıyoruz...');
+      try {
+        // Hedef dizini oluştur
+        const targetDir = path.join(__dirname, 'client', 'node_modules', 'vite');
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+        
+        // Kaynak dizini kontrol et
+        const sourceDir = path.join(__dirname, 'node_modules', 'vite');
+        if (!fs.existsSync(sourceDir)) {
+          console.log('Kaynak Vite dizini bulunamadı:', sourceDir);
+          throw new Error('Vite kaynak dizini bulunamadı');
+        }
+        
+        // Vite dizininin içeriğini listele
+        console.log('Vite kaynak dizini içeriği:');
+        const viteFiles = fs.readdirSync(sourceDir);
+        console.log(viteFiles);
+        
+        // Dosyaları kopyala
+        viteFiles.forEach(file => {
+          const sourcePath = path.join(sourceDir, file);
+          const targetPath = path.join(targetDir, file);
+          
+          if (fs.statSync(sourcePath).isDirectory()) {
+            // Dizin ise recursive kopyala
+            fs.cpSync(sourcePath, targetPath, { recursive: true });
+          } else {
+            // Dosya ise kopyala
+            fs.copyFileSync(sourcePath, targetPath);
+          }
+        });
+        
+        console.log('Vite modülü client/node_modules dizinine kopyalandı');
+      } catch (copyError) {
+        console.error('Vite kopyalama hatası:', copyError);
+        throw copyError;
       }
-      console.log('Vite modülü client/node_modules dizinine kopyalandı');
       
       // Vite'ı doğrudan çalıştır
       console.log('Vite build komutu çalıştırılıyor...');
       
       // Vite'ı önceden yükleyen bir wrapper script oluştur
       const wrapperScript = `
-        // Vite'ı önceden yükle
-        import * as vite from './node_modules/vite/index.js';
-        // Vite'ı global olarak tanımla
-        globalThis.vite = vite;
-        // Vite build komutunu çalıştır
-        import('./node_modules/vite/bin/vite.js');
+        // Vite build komutunu doğrudan çalıştır
+        // Vite'ı global olarak tanımlamaya gerek yok
+        // Doğrudan npx kullanımına benzer şekilde çalışacak
+        console.log('Vite build başlatılıyor...');
+        process.argv.push('build');
+        import('vite/bin/vite.js');
       `;
       
       // Wrapper script'i geçici bir dosyaya yaz
@@ -193,7 +222,10 @@ try {
       console.log('Doğrudan vite çalıştırma hatası:', viteError);
       console.log('Alternatif yöntemler deneniyor...');
       
-      // Alternatif yöntem: npx ile çalıştır
+      // Alternatif yöntem: önce vite'ı yükle, sonra npx ile çalıştır
+      console.log('Vite paketini açıkça yüklüyoruz...');
+      execSync('npm install vite@5.4.19 --no-save', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+      console.log('Vite build komutunu npx ile çalıştırıyoruz...');
       execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
     }
     console.log('Client build işlemi tamamlandı');
