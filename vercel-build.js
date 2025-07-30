@@ -204,8 +204,8 @@ try {
     // Client dizininde build işlemini gerçekleştir
     console.log('Vite build komutu doğrudan çalıştırılıyor...');
     // Vite'ı doğrudan node_modules'dan çalıştırmayı dene
-      try {
-        console.log('Vite modülünü doğrudan yüklemeyi deniyoruz...');
+    try {
+      console.log('Vite modülünü doğrudan yüklemeyi deniyoruz...');
         
         // Önce global olarak vite'ı yükle
         console.log('Vite paketini global olarak yüklüyoruz...');
@@ -238,13 +238,13 @@ try {
           throw new Error('Vite paketi client/node_modules içinde bulunamadı');
         }
       
-      // Vite'ı doğrudan çalıştır
-      console.log('Vite build komutu çalıştırılıyor...');
-      
-      // Vite'ı doğrudan npx ile çalıştır
-      console.log('Vite build komutu npx ile çalıştırılıyor...');
-      execSync('npx vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-      console.log('Vite build komutu tamamlandı');
+        // Vite'ı doğrudan çalıştır
+        console.log('Vite build komutu çalıştırılıyor...');
+        
+        // Vite'ı doğrudan npx ile çalıştır
+        console.log('Vite build komutu npx ile çalıştırılıyor...');
+        execSync('npx vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+        console.log('Vite build komutu tamamlandı');
     } catch (viteError) {
       console.log('Doğrudan vite çalıştırma hatası:', viteError);
       console.log('Alternatif yöntemler deneniyor...');
