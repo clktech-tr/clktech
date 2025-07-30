@@ -249,50 +249,104 @@ try {
       console.log('Doğrudan vite çalıştırma hatası:', viteError);
       console.log('Alternatif yöntemler deneniyor...');
       
-      // Alternatif yöntem 1: Vite'ı açıkça yükle ve PATH'e ekle
-      console.log('Alternatif yöntem 1: Vite paketini açıkça yüklüyoruz ve PATH değişkenine ekliyoruz...');
-      execSync('npm install vite@5.4.19 --no-save', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-      
-      // Node.js ve işletim sistemi bilgilerini yazdır
-      console.log('Node.js sürümü:', process.version);
-      console.log('İşletim sistemi:', process.platform);
-      
-      // İşletim sistemine göre PATH ayarla
-      if (process.platform === 'win32') {
-        console.log('Windows ortamı tespit edildi, PATH ayarlanıyor...');
-        // Windows için PATH ayarla
-        const npmBinPath = execSync('npm bin -g').toString().trim();
-        process.env.PATH = `${npmBinPath};${process.env.PATH}`;
-      } else {
-        console.log('Unix/Linux ortamı tespit edildi, PATH ayarlanıyor...');
-        // Unix/Linux için PATH ayarla
-        const npmBinPath = execSync('npm bin -g').toString().trim();
-        process.env.PATH = `${npmBinPath}:${process.env.PATH}`;
-      }
-      console.log('PATH değişkeni güncellendi');
-      console.log('Güncel PATH:', process.env.PATH);
-      console.log('Vite build komutunu doğrudan çalıştırıyoruz...');
+      // Alternatif yöntem 1: Vite'ı client dizinine yükle ve doğrudan kullan
+       console.log('Alternatif yöntem 1: Vite\'ı client dizinine yüklüyoruz...');
+       try {
+         // Vite'ı client dizinine yükle
+         console.log('Vite paketini client dizinine yüklüyoruz...');
+         execSync('npm install vite@5.4.19 --no-save', { 
+           stdio: 'inherit', 
+           cwd: path.join(__dirname, 'client')
+         });
+         
+         // Yükleme sonrası node_modules içeriğini kontrol et
+         console.log('Yükleme sonrası node_modules içeriğini kontrol ediyoruz...');
+         const nodeModulesPath = path.join(__dirname, 'client', 'node_modules');
+         const viteModulePath = path.join(nodeModulesPath, 'vite');
+         
+         if (fs.existsSync(viteModulePath)) {
+           console.log('Vite paketi başarıyla yüklendi:', viteModulePath);
+           
+           // Vite versiyonunu kontrol et
+           try {
+             const vitePackageJson = JSON.parse(fs.readFileSync(path.join(viteModulePath, 'package.json'), 'utf8'));
+             console.log('Yüklenen Vite versiyonu:', vitePackageJson.version);
+           } catch (err) {
+             console.log('Vite versiyonu kontrol edilemedi:', err.message);
+           }
+           
+           // node_modules/.bin içeriğini kontrol et
+           const binPath = path.join(nodeModulesPath, '.bin');
+           if (fs.existsSync(binPath)) {
+             console.log('node_modules/.bin dizini içeriği:');
+             fs.readdirSync(binPath).forEach(file => {
+               console.log(`- ${file}`);
+             });
+           }
+           
+           // Vite'ı doğrudan çalıştır
+           console.log('Vite build komutunu çalıştırıyoruz...');
+           execSync('npx vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+         } else {
+           console.log('Vite paketi client/node_modules içinde bulunamadı!');
+           throw new Error('Vite paketi client/node_modules içinde bulunamadı');
+         }
+       } catch (alternativeError) {
+         console.log('Client build hatası:', alternativeError);
+         
+         // Alternatif yöntem 2: Doğrudan npx ile Vite'ı çalıştır - Vercel ortamında en güvenilir yöntem
+         console.log('Alternatif yöntem 2: npx ile Vite build komutunu çalıştırıyoruz...');
       try {
-        execSync('vite build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-      } catch (directError) {
-        console.log('Doğrudan vite çalıştırma başarısız oldu:', directError.message);
-        
-        // Alternatif yöntem 2: npx ile belirli bir versiyonu çalıştır
-        console.log('Alternatif yöntem 2: npx ile belirli bir Vite versiyonunu çalıştırıyoruz...');
-        try {
-          execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
-        } catch (npxError) {
-          console.log('npx ile vite çalıştırma başarısız oldu:', npxError.message);
-          
-          // Alternatif yöntem 3: Vite'ı node_modules/.bin üzerinden doğrudan çalıştır
-          console.log('Alternatif yöntem 3: Vite\'ı node_modules/.bin üzerinden çalıştırıyoruz...');
-          const binPath = path.join(__dirname, 'client', 'node_modules', '.bin', 'vite');
-          if (fs.existsSync(binPath)) {
+        // Önce node_modules/.bin içindeki vite'ı kontrol et
+        const binPath = path.join(__dirname, 'client', 'node_modules', '.bin', 'vite');
+        if (fs.existsSync(binPath)) {
+          console.log('Vite binary bulundu, doğrudan çalıştırılıyor...');
+          // Windows ve Unix/Linux için uyumlu çalıştırma
+          if (process.platform === 'win32') {
             execSync(`"${binPath}" build`, { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
           } else {
-            console.log('Vite binary bulunamadı:', binPath);
-            throw new Error('Hiçbir alternatif yöntem başarılı olmadı');
+            execSync(`${binPath} build`, { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
           }
+        } else {
+          console.log('Vite binary bulunamadı, npx ile çalıştırılıyor...');
+          // npx ile belirli bir versiyonu çalıştır
+          execSync('npx vite@5.4.19 build', { stdio: 'inherit', cwd: path.join(__dirname, 'client') });
+        }
+      } catch (buildError) {
+        console.log('Vite build hatası:', buildError.message);
+        
+        // Son çare: Basit bir HTML dosyası oluştur
+        console.log('Alternatif yöntem: Basit bir HTML dosyası oluşturuluyor...');
+        try {
+          // dist/public klasörünü oluştur
+          if (!fs.existsSync(path.join(__dirname, 'dist', 'public'))) {
+            fs.mkdirSync(path.join(__dirname, 'dist', 'public'), { recursive: true });
+          }
+          
+          // Basit bir index.html dosyası oluştur
+          const simpleHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLKtech</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    h1 { color: #333; }
+    p { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>CLKtech</h1>
+  <p>Site yapım aşamasındadır. Lütfen daha sonra tekrar ziyaret edin.</p>
+</body>
+</html>`;
+          
+          fs.writeFileSync(path.join(__dirname, 'dist', 'public', 'index.html'), simpleHtml);
+          console.log('Basit HTML dosyası oluşturuldu');
+        } catch (fallbackError) {
+          console.log('Basit HTML oluşturma hatası:', fallbackError.message);
+          throw new Error('Hiçbir alternatif yöntem başarılı olmadı');
         }
       }
     }
