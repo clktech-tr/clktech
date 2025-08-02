@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "npm run build:frontend",
   "outputDirectory": "dist/public",
-  "installCommand": "npm install",
+  "installCommand": "npm ci",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://clktech-backend.onrender.com/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
