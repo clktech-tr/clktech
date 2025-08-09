@@ -18,11 +18,20 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    sourcemap: true,
+    minify: 'terser',
     rollupOptions: {
-      external: ['wouter'],
+      input: {
+        main: path.resolve(__dirname, 'index.html')
+      },
       output: {
-        globals: {
-          wouter: 'wouter'
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'wouter',
+            '@tanstack/react-query'
+          ]
         }
       }
     }
