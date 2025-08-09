@@ -20,6 +20,10 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     minify: 'terser',
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true
+    },
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html')
@@ -35,9 +39,11 @@ export default defineConfig({
             'react-i18next'
           ]
         }
-      },
-      external: ['i18next', 'react-i18next']
+      }
     }
+  },
+  optimizeDeps: {
+    include: ['i18next', 'react-i18next']
   },
   resolve: {
     alias: {
