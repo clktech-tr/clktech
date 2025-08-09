@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import type { Product as ProductBase } from "@shared/schema";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +24,7 @@ export function ProductCard({ product, onOrderClick }: { product: any, onOrderCl
   const description = safeParseObj(product.description);
   const price = safeParseObj(product.price);
   return (
-    <Link href={`/products/${product.id}`} className="block">
+    <Link to={`/products/${product.id}`} className="block">
       <Card className="card-hover bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transition-transform hover:scale-105">
         <div className="relative">
           <img

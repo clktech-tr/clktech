@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
@@ -6,11 +6,11 @@ import clkLogo from "@assets/clklogo_1752565795957.png";
 import { useTranslation } from "react-i18next";
 
 export function Navbar() {
-  const [location] = useLocation();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, i18n } = useTranslation();
 
-  const isActive = (path: string) => location === path;
+  const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
     { path: "/", label: t("navbar.home") },
@@ -25,7 +25,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <img src={clkLogo} alt="CLKtech Logo" className="h-20 w-20 min-h-[80px] min-w-[80px] flex-shrink-0 mr-0" />
           </Link>
 
@@ -34,7 +34,7 @@ export function Navbar() {
             {navItems.map((item) => (
               <Link
                 key={item.path}
-                href={item.path}
+                to={item.path}
                 className={`nav-link font-medium px-4 py-2 transition-all duration-200 ${
                   isActive(item.path)
                     ? "bg-clip-text text-transparent bg-gradient-to-r from-[#f59e42] to-[#34d399]"
@@ -75,7 +75,7 @@ export function Navbar() {
             {navItems.map((item) => (
               <Link
                 key={item.path}
-                href={item.path}
+                to={item.path}
                 className={`block py-3 font-medium px-4 transition-all duration-200 ${
                   isActive(item.path)
                     ? "bg-clip-text text-transparent bg-gradient-to-r from-[#f59e42] to-[#34d399]"

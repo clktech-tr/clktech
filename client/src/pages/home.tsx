@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,10 +44,10 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 animate-slide-up">
                 <Button asChild size="lg" className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200">
-                  <Link href="/products">{t("home.discoverProducts", "View Products")}</Link>
+                  <Link to="/products">{t("home.discoverProducts", "View Products")}</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="border-2 border-white hover:bg-white hover:text-slate-900 text-white transition-all duration-300 hover:scale-105 hover:shadow-xl bg-white/10 backdrop-blur-sm">
-                  <Link href="/contact">{t("home.getQuote", "Get Custom Quote")}</Link>
+                  <Link to="/contact">{t("home.getQuote", "Get Custom Quote")}</Link>
                 </Button>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function Home() {
           
           <div className="text-center mt-12">
             <Button asChild size="lg" className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200">
-              <Link href="/products">
+              <Link to="/products">
                 {t("home.viewAllProducts", "View All Products")}
               </Link>
             </Button>

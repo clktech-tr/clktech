@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,7 +55,7 @@ export default function ProductDetail() {
           <div className="text-center">
             <h1 className="text-2xl font-bold clk-text-black mb-4">{t("productDetail.notFoundTitle")}</h1>
             <p className="text-gray-600 mb-8">{t("productDetail.notFoundDesc")}</p>
-            <Link href="/products">
+            <Link to="/products">
               <Button className="btn-primary">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t("productDetail.backToProducts")}
@@ -80,7 +80,7 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <div className="mb-8">
-          <Link href="/products" className="inline-flex items-center text-gray-600 hover:text-orange-500">
+          <Link to="/products" className="inline-flex items-center text-gray-600 hover:text-orange-500">
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t("productDetail.backToProducts")}
           </Link>
@@ -171,7 +171,7 @@ export default function ProductDetail() {
                     className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200 w-full py-4 text-lg mt-4"
                     asChild
                   >
-                    <Link href="/contact" className="flex items-center justify-center w-full">
+                    <Link to="/contact" className="flex items-center justify-center w-full">
                       {t("productDetail.contactUs")}
                     </Link>
                   </Button>

@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import clkLogo from "@assets/clklogo_1752565795957.png";
 import { useTranslation } from "react-i18next";
@@ -47,10 +47,10 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">{t("footer.products")}</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/products/1" className="footer-link">LineX Controller</Link></li>
-              <li><Link href="/products/2" className="footer-link">MazeX Controller</Link></li>
-              <li><Link href="/products/3" className="footer-link">VivianX Controller</Link></li>
-              <li><Link href="/products" className="footer-link">{t("footer.allProducts")}</Link></li>
+              <li><Link to="/products/1" className="footer-link">LineX Controller</Link></li>
+              <li><Link to="/products/2" className="footer-link">MazeX Controller</Link></li>
+              <li><Link to="/products/3" className="footer-link">VivianX Controller</Link></li>
+              <li><Link to="/products" className="footer-link">{t("footer.allProducts")}</Link></li>
             </ul>
           </div>
 
@@ -58,10 +58,10 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">{t("footer.support")}</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/docs" className="footer-link">{t("footer.documentation")}</Link></li>
-              <li><Link href="/tutorials" className="footer-link">{t("footer.tutorials")}</Link></li>
-              <li><Link href="/community" className="footer-link">{t("footer.community")}</Link></li>
-              <li><Link href="/contact" className="footer-link">Teknik Destek</Link></li>
+              <li><Link to="/docs" className="footer-link">{t("footer.documentation")}</Link></li>
+              <li><Link to="/tutorials" className="footer-link">{t("footer.tutorials")}</Link></li>
+              <li><Link to="/community" className="footer-link">{t("footer.community")}</Link></li>
+              <li><Link to="/contact" className="footer-link">Teknik Destek</Link></li>
             </ul>
           </div>
 
@@ -69,10 +69,10 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">{t("footer.company")}</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/about" className="footer-link">{t("footer.aboutUs")}</Link></li>
-              <li><Link href="/contact" className="footer-link">{t("footer.contact")}</Link></li>
-              <li><Link href="/privacy-policy" className="footer-link">{t("footer.privacyPolicy")}</Link></li>
-              <li><Link href="/terms-of-service" className="footer-link">{t("footer.termsOfService")}</Link></li>
+              <li><Link to="/about" className="footer-link">{t("footer.aboutUs")}</Link></li>
+              <li><Link to="/contact" className="footer-link">{t("footer.contact")}</Link></li>
+              <li><Link to="/privacy-policy" className="footer-link">{t("footer.privacyPolicy")}</Link></li>
+              <li><Link to="/terms-of-service" className="footer-link">{t("footer.termsOfService")}</Link></li>
             </ul>
           </div>
         </div>
