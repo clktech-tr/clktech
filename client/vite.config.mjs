@@ -30,10 +30,13 @@ export default defineConfig({
             'react',
             'react-dom',
             'wouter',
-            '@tanstack/react-query'
+            '@tanstack/react-query',
+            'i18next',
+            'react-i18next'
           ]
         }
-      }
+      },
+      external: ['i18next', 'react-i18next']
     }
   },
   resolve: {
