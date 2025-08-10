@@ -4,9 +4,7 @@ services:
     env: node
     buildCommand: |
       npm install --no-package-lock
-      cd client && npm install --no-package-lock && cd ..
-      cd server && npm install --no-package-lock && cd ..
-      npm run build
+      cd server && npm install --no-package-lock && npm run build && cd ..
     startCommand: cross-env NODE_ENV=production node dist/server/server/index.js
     envVars:
       - key: NODE_ENV
