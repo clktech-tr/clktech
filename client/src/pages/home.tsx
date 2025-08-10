@@ -24,7 +24,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 opacity-10"
           style={{
-            backgroundImage: `url('${settings?.blockCodeScreenshot1 || "/uploads/CLK_Block_Code_2_1752565795955.png"}')`,
+            backgroundImage: `url('${settings?.blockCodeScreenshot1 || "/uploads/robot_selection_interface.png"}')`,
             backgroundSize: "cover",
             backgroundPosition: "center"
           }}
@@ -162,7 +162,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
               <img 
-                src={settings?.blockCodeScreenshot1 || "/uploads/CLK_Block_Code_2_1752565795955.png"} 
+                src={settings?.blockCodeScreenshot1 || "/uploads/robot_selection_interface.png"} 
                 alt="Robot Selection Interface" 
                 className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
               />
@@ -171,7 +171,7 @@ export default function Home() {
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
               <img 
-                src={settings?.blockCodeScreenshot2 || "/uploads/CLK_Block_Code_4_1752565795956.png"} 
+                src={settings?.blockCodeScreenshot2 || "/uploads/block_programming_interface.png"} 
                 alt="Real-time Testing" 
                 className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
               />
@@ -180,7 +180,7 @@ export default function Home() {
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
               <img 
-                src={settings?.blockCodeScreenshot2 || "/uploads/CLK_Block_Code_3_1752565795955.png"} 
+                src={settings?.blockCodeScreenshot2 || "/uploads/real_time_testing.png"} 
                 alt="Block Programming Interface" 
                 className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
               />

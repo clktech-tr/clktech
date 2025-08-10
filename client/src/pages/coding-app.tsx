@@ -55,7 +55,7 @@ export default function CodingApp() {
             <div className="relative group">
               <div className="absolute -inset-4 bg-gradient-to-br from-blue-500/40 via-purple-500/30 to-transparent rounded-3xl blur-2xl z-0 animate-pulse" />
               <img
-                src="/uploads/CLK_Block_Code_4_1752565795956.png"
+                src="/uploads/block_programming_interface.png"
                 alt={t("codingApp.screenshotAlt")}
                 className="w-full max-w-[520px] h-auto max-h-[340px] object-contain bg-white rounded-2xl shadow-2xl border-4 border-white/10 relative z-10 group-hover:scale-105 transition-all duration-500"
               />
@@ -97,7 +97,7 @@ export default function CodingApp() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
               <img 
-                src="/uploads/CLK_Block_Code_2_1752565795955.png" 
+                src="/uploads/robot_selection_interface.png" 
                 alt="Robot Seçimi" 
                 className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
               />
@@ -106,7 +106,7 @@ export default function CodingApp() {
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
               <img 
-                src="/uploads/CLK_Block_Code_4_1752565795956.png" 
+                src="/uploads/block_programming_interface.png" 
                 alt="Görsel Programlama" 
                 className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
               />
@@ -115,7 +115,7 @@ export default function CodingApp() {
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:-translate-y-2 group">
               <img 
-                src="/uploads/CLK_Block_Code_3_1752565795955.png" 
+                src="/uploads/real_time_testing.png" 
                 alt="Gerçek Zamanlı Test" 
                 className="w-full h-48 object-cover rounded-lg mb-4 group-hover:scale-105 transition-transform duration-300"
               />
