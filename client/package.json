@@ -16,6 +16,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.1",
+    "drizzle-orm": "^0.44.4",
     "i18next": "^25.3.2",
     "lucide-react": "^0.539.0",
     "postcss": "^8.5.6",
