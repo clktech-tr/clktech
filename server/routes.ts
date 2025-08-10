@@ -1,12 +1,27 @@
-import type { Express, Request, Response } from "express";
-import express from "express";
-import { createServer, type Server } from "http";
+import express from 'express';
+import type { Express, Request as ExpressRequest, Response as ExpressResponse, NextFunction } from 'express';
+
+type Request = ExpressRequest & {
+  file?: Express.Multer.File;
+};
+type Response = ExpressResponse;
+type Application = {
+  get: (path: string, ...handlers: Array<any>) => void;
+  post: (path: string, ...handlers: Array<any>) => void;
+  put: (path: string, ...handlers: Array<any>) => void;
+  patch: (path: string, ...handlers: Array<any>) => void;
+  delete: (path: string, ...handlers: Array<any>) => void;
+  use: (path: string | ((req: Request, res: Response, next: NextFunction) => void), ...handlers: Array<any>) => void;
+};
+type FileFilterCallback = (error: Error | null, acceptFile: boolean) => void;
+import { createServer, type Server, type IncomingMessage, type ServerResponse } from "http";
 import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage.js';
 import { insertProductSchema, insertOrderSchema, insertContactSchema } from "../shared/schema.runtime.js";
-import multer from "multer";
+import multer from 'multer';
+
 import path from "path";
 import fs from "fs";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import { supabase } from "./supabaseClient.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
@@ -20,13 +35,13 @@ if (!fs.existsSync(uploadsDir)) {
 const upload = multer({
   storage: multer.diskStorage({
     destination: uploadsDir,
-    filename: (req, file, cb) => {
+    filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
@@ -34,7 +49,7 @@ const upload = multer({
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'));
+      cb(new Error('Only image files are allowed'), false);
     }
   },
 });
@@ -47,13 +62,13 @@ if (!fs.existsSync(downloadsDir)) {
 const zipUpload = multer({
   storage: multer.diskStorage({
     destination: downloadsDir,
-    filename: (req, file, cb) => {
+    filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     },
   }),
   limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
     // Dosya uzantısını ve MIME tipini kontrol et
     const extname = path.extname(file.originalname).toLowerCase();
     console.log('Dosya yükleme isteği:', { filename: file.originalname, mimetype: file.mimetype, extname });
@@ -64,14 +79,14 @@ const zipUpload = multer({
         file.mimetype === 'application/octet-stream') {
       cb(null, true);
     } else {
-      cb(new Error('Sadece .zip dosyası yükleyebilirsiniz.'));
+      cb(new Error('Sadece .zip dosyası yükleyebilirsiniz.'), false);
     }
   },
 });
 
 // Multer hata yakalama middleware'i
 const handleMulterError = (err: any, req: Request, res: Response, next: any) => {
-  if (err instanceof multer.MulterError) {
+  if (err && err.name === 'MulterError') {
     // Multer hatası (dosya boyutu sınırı aşıldı, vb.)
     console.error('Multer hatası:', err);
     
@@ -180,7 +195,7 @@ function safeParseJson(val: any) {
   }
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Application): Promise<Server> {
   // Serve uploaded files
   app.use("/api/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
   
@@ -505,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     (req: Request, res: Response, next: any) => {
       // Dosya yükleme işlemini try-catch bloğu içinde gerçekleştir
       try {
-        zipUpload.single('file')(req, res, (err) => {
+        zipUpload.single('file')(req, res, (err: any) => {
           if (err) {
             // handleMulterError middleware'ini manuel olarak çağır
             return handleMulterError(err, req, res, next);
@@ -719,7 +734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DEBUG: Supabase ve env test endpointi
-  app.get('/api/debug/env', async (req, res) => {
+  app.get('/api/debug/env', async (req: Request, res: Response) => {
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_KEY ? 'OK' : 'YOK';
     let adminTest = null;
@@ -741,6 +756,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  const httpServer = createServer(app);
+  const httpServer = createServer(app as any);
   return httpServer;
 }

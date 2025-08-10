@@ -110,7 +110,7 @@ export const insertProductSchema = createInsertSchema(products).omit({
   fullDescription: langObj,
   price: z.object({ tr: z.string(), en: z.string() }),
   inStock: z.preprocess(
-    (val) => {
+    (val: any) => {
       if (typeof val === "string") return val === "true";
       return Boolean(val);
     },

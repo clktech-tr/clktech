@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import express, { type Request, Response, NextFunction } from "express";
+import express from 'express';
+import type { Request, Response, NextFunction } from '@types/express';
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 
@@ -34,15 +35,15 @@ app.use(express.urlencoded({ extended: false }));
 // CORS middleware'ini uygula
 app.use(cors);
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+  const originalResJson = res.json.bind(res);
+  res.json = function (body: any) {
+    capturedJsonResponse = body;
+    return originalResJson(body);
   };
 
   res.on("finish", () => {
