@@ -9,7 +9,8 @@ export function Footer() {
   const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
-    fetch('/api/settings')
+    const baseUrl = import.meta.env.VITE_API_URL;
+    fetch(`${baseUrl}/api/settings`)
       .then(res => res.json())
       .then(data => setSettings(data));
   }, []);

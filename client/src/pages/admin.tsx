@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import SiteSettings from '../components/admin/site-settings';
 
 export default function Admin() {
+  const baseUrl = import.meta.env.VITE_API_URL;
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
@@ -35,7 +36,7 @@ export default function Admin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/admin/login", data);
+  const response = await apiRequest("POST", `${baseUrl}/api/admin/login`, data);
       return response.json();
     },
     onSuccess: (data) => {
@@ -66,7 +67,7 @@ export default function Admin() {
     mutationFn: async (productId: number) => {
       console.log("Deleting product with ID in mutationFn:", productId);
       const token = localStorage.getItem("admin_token");
-      const response = await fetch(`/api/admin/products/${productId}`, {
+  const response = await fetch(`${baseUrl}/api/admin/products/${productId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
