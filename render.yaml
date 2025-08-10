@@ -2,7 +2,11 @@ services:
   - type: web
     name: clktech-backend
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: |
+      npm install --no-package-lock
+      cd client && npm install --no-package-lock && cd ..
+      cd server && npm install --no-package-lock && cd ..
+      npm run build
     startCommand: cross-env NODE_ENV=production node dist/server/server/index.js
     envVars:
       - key: NODE_ENV
