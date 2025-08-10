@@ -17,8 +17,9 @@
     "declaration": true,
     "sourceMap": true,
     "typeRoots": ["./types", "./node_modules/@types"],
-    "allowImportingTsExtensions": true,
-    "lib": ["es2020"]
+    "lib": ["es2020"],
+    "noEmit": false,
+    "emitDeclarationOnly": false
   },
   "include": ["server/**/*", "shared/**/*", "types/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "client"]
