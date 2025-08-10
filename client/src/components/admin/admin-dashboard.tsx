@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import type { Order, Product } from "@shared/schema";
+// ...existing code...
+import type { Order, Product } from "@shared/types";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { ChartContainer } from "@/components/ui/chart";

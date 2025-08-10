@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertContactSchema } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -15,9 +14,14 @@ import { z } from "zod";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-// Extended schema to include CAPTCHA validation
-const contactFormSchema = insertContactSchema.extend({
-  captchaAnswer: z.number().int(), // .positive() kaldırıldı
+// Zod şeması doğrudan burada tanımlanıyor
+const contactFormSchema = z.object({
+  firstName: z.string().min(2, "Ad gerekli"),
+  lastName: z.string().min(2, "Soyad gerekli"),
+  email: z.string().email("Geçerli bir e-posta adresi girin"),
+  subject: z.string().min(2, "Konu gerekli"),
+  message: z.string().min(5, "Mesaj gerekli"),
+  captchaAnswer: z.number().int(),
 });
 
 type ContactFormData = z.infer<typeof contactFormSchema>;

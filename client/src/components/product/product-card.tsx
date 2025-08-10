@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import type { Product as ProductBase } from "@shared/schema";
+import type { Product as ProductBase } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
 type LangMap = { en: string; tr: string };

@@ -6,14 +6,14 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 export default defineConfig({
   plugins: [
     react(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: path.resolve(__dirname, '../public/attached_assets'),
-          dest: '.'
-        }
-      ]
-    })
+  // viteStaticCopy({
+  //   targets: [
+  //     {
+  //       src: path.resolve(__dirname, './public/attached_assets'),
+  //       dest: '.'
+  //     }
+  //   ]
+  // })
   ],
   build: {
     outDir: 'dist',
@@ -33,7 +33,6 @@ export default defineConfig({
           vendor: [
             'react',
             'react-dom',
-            'wouter',
             '@tanstack/react-query',
             'i18next',
             'react-i18next'

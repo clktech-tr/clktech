@@ -6,19 +6,28 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProductSchema } from "@shared/schema";
+import { ProductForm } from "@shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@shared/schema";
+import type { Product } from "@shared/types";
 import { z } from "zod";
 import { useEffect } from "react";
 
-const productFormSchema = insertProductSchema.extend({
+const productFormSchema = z.object({
+  name: z.object({ tr: z.string().min(2), en: z.string().min(2) }),
+  slug: z.string().min(2),
+  description: z.object({ tr: z.string().min(2), en: z.string().min(2) }),
+  fullDescription: z.object({ tr: z.string().min(2), en: z.string().min(2) }),
+  price: z.object({ tr: z.string().min(1), en: z.string().min(1) }),
+  image: z.string().optional(),
   imageFile: z.any().optional(),
+  category: z.string().min(2),
+  inStock: z.boolean(),
+  specs: z.string().optional(),
+  externalLinks: z.string().optional(),
 });
-
-type ProductFormData = z.infer<typeof productFormSchema>;
+type ProductFormData = ProductForm & { imageFile?: FileList };
 
 interface ProductFormProps {
   product?: Product;
@@ -129,7 +138,7 @@ export function ProductForm({ product, isOpen, onClose }: ProductFormProps) {
       
       // Append all fields to FormData
       Object.entries(data).forEach(([key, value]) => {
-        if (key === "imageFile" && value?.[0]) {
+        if (key === "imageFile" && value instanceof FileList && value.length > 0) {
           formData.append("image", value[0]);
         } else if (key === "inStock") {
           // inStock'u boolean olarak ekle

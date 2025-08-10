@@ -13,7 +13,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
-import type { Product } from "@shared/schema";
+import type { Product } from "@shared/types";
 import { useTranslation } from "react-i18next";
 import SiteSettings from '../components/admin/site-settings';
 

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
 import { useState } from "react";
-import type { Product } from "@shared/schema";
+import type { Product } from "@shared/types";
 import { useTranslation } from "react-i18next";
 import { OrderForm } from "@/components/order/order-form";
 type LangMap = { en: string; tr: string };

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { Package, Plus, Edit, Trash2 } from "lucide-react";
-import type { Product } from "@shared/schema";
+import type { Product } from "@shared/types";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 

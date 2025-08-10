@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { OrderForm } from "@/components/order/order-form";
-import type { Product } from "@shared/schema";
+import type { Product } from "@shared/types";
 
 interface ProductModalProps {
   product: Product | null;

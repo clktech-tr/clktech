@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductCard } from "@/components/product/product-card";
 import { Cog, Award, Truck, CheckCircle } from "lucide-react";
-import type { Product } from "@shared/schema";
+import type { Product } from "@shared/types";
 import { useTranslation } from "react-i18next";
 
 export default function Home() {

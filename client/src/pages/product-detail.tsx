@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { OrderForm } from "@/components/order/order-form";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import type { Product as ProductBase } from "@shared/schema";
+import type { Product as ProductBase } from "@shared/types";
 import { useTranslation } from "react-i18next";
 type LangMap = { en: string; tr: string };
 function getLangField(field: string | LangMap, lang: string): string {
