@@ -18,6 +18,8 @@
     "build:backend": "cd server && npm ci && cd .. && tsc --project tsconfig-backend.json"
   },
   "dependencies": {
+    "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.8.3",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
@@ -58,8 +60,8 @@
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
     "dotenv": "^17.2.0",
-    "drizzle-orm": "^0.39.3",
-    "drizzle-zod": "^0.7.1",
+    "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.8.3",
     "embla-carousel-react": "^8.6.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
