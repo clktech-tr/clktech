@@ -53,13 +53,13 @@ const upload = multer({
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req: Request, file: MulterFile, cb: (error: Error | undefined, acceptFile: boolean) => void) => {
+  fileFilter: (req: Request, file: MulterFile, cb: (error: any, acceptFile: boolean) => void) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     
     if (mimetype && extname) {
-      return cb(undefined, true);
+      return cb(null, true);
     } else {
       cb(new Error('Only image files are allowed'), false);
     }
@@ -80,7 +80,7 @@ const zipUpload = multer({
     },
   }),
   limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
-  fileFilter: (req: Request, file: MulterFile, cb: (error: Error | undefined, acceptFile: boolean) => void) => {
+  fileFilter: (req: Request, file: MulterFile, cb: (error: any, acceptFile: boolean) => void) => {
     // Dosya uzantısını ve MIME tipini kontrol et
     const extname = path.extname(file.originalname).toLowerCase();
     console.log('Dosya yükleme isteği:', { filename: file.originalname, mimetype: file.mimetype, extname });
@@ -89,7 +89,7 @@ const zipUpload = multer({
     if (extname === '.zip' || file.mimetype === 'application/zip' || 
         file.mimetype === 'application/x-zip-compressed' || 
         file.mimetype === 'application/octet-stream') {
-      cb(undefined, true);
+      cb(null, true);
     } else {
       cb(new Error('Sadece .zip dosyası yükleyebilirsiniz.'), false);
     }

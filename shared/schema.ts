@@ -1,4 +1,5 @@
-import type { z } from "zod";
+// Zod tip çıkarımı için ReturnType<typeof schema['parse']> kullanılacak
+// import type { z } from "zod"; satırı kaldırıldı
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
