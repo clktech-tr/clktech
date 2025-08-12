@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import type { infer as zodInfer } from "zod";
 
 export const settings = pgTable("settings", {
   id: serial("id").primaryKey(),
@@ -34,7 +35,7 @@ export const insertSettingsSchema = createInsertSchema(settings).omit({
 });
 
 export type Setting = typeof settings.$inferSelect;
-export type InsertSetting = z.infer<typeof insertSettingsSchema>;
+export type InsertSetting = typeof insertSettingsSchema._type;
 
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -140,12 +141,12 @@ export const insertAdminSchema = createInsertSchema(admins).omit({
 });
 
 export type Product = typeof products.$inferSelect;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type InsertProduct = typeof insertProductSchema._type;
 export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUser = typeof insertUserSchema._type;
 export type Order = typeof orders.$inferSelect;
-export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type InsertOrder = typeof insertOrderSchema._type;
 export type Contact = typeof contacts.$inferSelect;
-export type InsertContact = z.infer<typeof insertContactSchema>;
+export type InsertContact = typeof insertContactSchema._type;
 export type Admin = typeof admins.$inferSelect;
-export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+export type InsertAdmin = typeof insertAdminSchema._type;

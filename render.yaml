@@ -2,11 +2,8 @@ services:
   - type: web
     name: clktech-backend
     env: node
-    buildCommand: |
-      npm install
-      npm install typescript -g
-      npm run build:backend
-    startCommand: NODE_ENV=production node dist/server/server/index.js
+    buildCommand: npm install && cd server && npm install && npm run build
+    startCommand: NODE_ENV=production node server/dist/server/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,4 +15,8 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
     healthCheckPath: /api/health

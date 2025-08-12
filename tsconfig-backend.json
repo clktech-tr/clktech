@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
+    "target": "es2022",
+    "module": "node16",
     "moduleResolution": "node",
-    "outDir": "dist/server",
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "outDir": "./dist",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,11 +17,11 @@
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "typeRoots": ["./server/types", "./node_modules/@types"],
     "lib": ["es2020"],
     "noEmit": false,
     "emitDeclarationOnly": false
   },
-  "include": ["server/**/*", "shared/**/*", "types/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "client"]
+  "include": ["server/**/*.ts", "shared/**/*.ts", "types/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "client", "**/*.d.ts", "**/*.js"]
 }

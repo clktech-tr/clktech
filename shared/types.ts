@@ -1,5 +1,14 @@
 // Sadece tipler export ediliyor. Zod şemaları frontend'de ayrı tanımlanacak.
 
+// Add FileList interface
+declare global {
+  interface FileList {
+    readonly length: number;
+    item(index: number): File | null;
+    [index: number]: File;
+  }
+}
+
 export type Product = {
   id: number;
   name: { tr: string; en: string };
@@ -42,6 +51,12 @@ export type Contact = {
   captchaAnswer: number;
   createdAt: string;
 };
+
+interface FileList {
+  readonly length: number;
+  item(index: number): File | null;
+  [index: number]: File;
+}
 
 export type ProductForm = {
   name: { tr: string; en: string };
