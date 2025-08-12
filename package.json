@@ -15,7 +15,7 @@
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "build:frontend": "cd client && npm ci && npm run build",
-    "build:backend": "cd server && npm ci && cd .. && tsc --project tsconfig-backend.json"
+    "build:backend": "tsc --project tsconfig-backend.json"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.4",
