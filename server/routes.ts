@@ -1,8 +1,20 @@
 import express from 'express';
 import type { Express, Request as ExpressRequest, Response as ExpressResponse, NextFunction } from 'express';
 
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  destination: string;
+  filename: string;
+  path: string;
+  buffer: Buffer;
+}
+
 type Request = ExpressRequest & {
-  file?: Express.Multer.File;
+  file?: MulterFile;
 };
 type Response = ExpressResponse;
 type Application = {
@@ -21,7 +33,7 @@ import multer from 'multer';
 
 import path from "path";
 import fs from "fs";
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 import { supabase } from "./supabaseClient.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
@@ -35,13 +47,13 @@ if (!fs.existsSync(uploadsDir)) {
 const upload = multer({
   storage: multer.diskStorage({
     destination: uploadsDir,
-    filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+    filename: (req: Request, file: MulterFile, cb: (error: Error | null, filename: string) => void) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+  fileFilter: (req: Request, file: MulterFile, cb: (error: Error | null, acceptFile: boolean) => void) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
@@ -62,13 +74,13 @@ if (!fs.existsSync(downloadsDir)) {
 const zipUpload = multer({
   storage: multer.diskStorage({
     destination: downloadsDir,
-    filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+    filename: (req: Request, file: MulterFile, cb: (error: Error | null, filename: string) => void) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + path.extname(file.originalname));
     },
   }),
   limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
-  fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+  fileFilter: (req: Request, file: MulterFile, cb: FileFilterCallback) => {
     // Dosya uzantısını ve MIME tipini kontrol et
     const extname = path.extname(file.originalname).toLowerCase();
     console.log('Dosya yükleme isteği:', { filename: file.originalname, mimetype: file.mimetype, extname });

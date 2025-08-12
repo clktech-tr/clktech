@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import type { Request, Response, NextFunction } from '@types/express';
+import type { Request, Response, NextFunction } from 'express';
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 
@@ -82,7 +82,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
