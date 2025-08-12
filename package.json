@@ -18,8 +18,6 @@
     "build:backend": "tsc --project tsconfig-backend.json"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.4",
-    "drizzle-zod": "^0.8.3",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
@@ -90,7 +88,7 @@
     "vaul": "^1.1.2",
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
-    "zod": "^3.25.76",
+    "zod": "^4.0.17",
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {

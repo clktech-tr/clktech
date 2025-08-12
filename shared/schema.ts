@@ -1,7 +1,9 @@
+import type { z } from "zod";
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import type { infer as zodInfer } from "zod";
+// Zod tip çıkarımı için ReturnType<typeof schema['parse']> kullanılacak
+// z.infer kullanılacak, ek import gerekmez
 
 export const settings = pgTable("settings", {
   id: serial("id").primaryKey(),
@@ -35,7 +37,7 @@ export const insertSettingsSchema = createInsertSchema(settings).omit({
 });
 
 export type Setting = typeof settings.$inferSelect;
-export type InsertSetting = typeof insertSettingsSchema._type;
+export type InsertSetting = ReturnType<typeof insertSettingsSchema['parse']>;
 
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -141,12 +143,12 @@ export const insertAdminSchema = createInsertSchema(admins).omit({
 });
 
 export type Product = typeof products.$inferSelect;
-export type InsertProduct = typeof insertProductSchema._type;
+export type InsertProduct = ReturnType<typeof insertProductSchema['parse']>;
 export type User = typeof users.$inferSelect;
-export type InsertUser = typeof insertUserSchema._type;
+export type InsertUser = ReturnType<typeof insertUserSchema['parse']>;
 export type Order = typeof orders.$inferSelect;
-export type InsertOrder = typeof insertOrderSchema._type;
+export type InsertOrder = ReturnType<typeof insertOrderSchema['parse']>;
 export type Contact = typeof contacts.$inferSelect;
-export type InsertContact = typeof insertContactSchema._type;
+export type InsertContact = ReturnType<typeof insertContactSchema['parse']>;
 export type Admin = typeof admins.$inferSelect;
-export type InsertAdmin = typeof insertAdminSchema._type;
+export type InsertAdmin = ReturnType<typeof insertAdminSchema['parse']>;

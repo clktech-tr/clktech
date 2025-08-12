@@ -25,7 +25,7 @@ type Application = {
   delete: (path: string, ...handlers: Array<any>) => void;
   use: (path: string | ((req: Request, res: Response, next: NextFunction) => void), ...handlers: Array<any>) => void;
 };
-type FileFilterCallback = (error: Error | null, acceptFile: boolean) => void;
+import type { FileFilterCallback } from 'multer';
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from "http";
 import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage.js';
 import { insertProductSchema, insertOrderSchema, insertContactSchema } from "../shared/schema.runtime.js";
@@ -53,13 +53,13 @@ const upload = multer({
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req: Request, file: MulterFile, cb: (error: Error | null, acceptFile: boolean) => void) => {
+  fileFilter: (req: Request, file: MulterFile, cb: (error: Error | undefined, acceptFile: boolean) => void) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     
     if (mimetype && extname) {
-      return cb(null, true);
+      return cb(undefined, true);
     } else {
       cb(new Error('Only image files are allowed'), false);
     }
@@ -80,7 +80,7 @@ const zipUpload = multer({
     },
   }),
   limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
-  fileFilter: (req: Request, file: MulterFile, cb: FileFilterCallback) => {
+  fileFilter: (req: Request, file: MulterFile, cb: (error: Error | undefined, acceptFile: boolean) => void) => {
     // Dosya uzantısını ve MIME tipini kontrol et
     const extname = path.extname(file.originalname).toLowerCase();
     console.log('Dosya yükleme isteği:', { filename: file.originalname, mimetype: file.mimetype, extname });
@@ -89,7 +89,7 @@ const zipUpload = multer({
     if (extname === '.zip' || file.mimetype === 'application/zip' || 
         file.mimetype === 'application/x-zip-compressed' || 
         file.mimetype === 'application/octet-stream') {
-      cb(null, true);
+      cb(undefined, true);
     } else {
       cb(new Error('Sadece .zip dosyası yükleyebilirsiniz.'), false);
     }
