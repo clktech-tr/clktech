@@ -17,7 +17,6 @@
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
-    "typeRoots": ["./server/types", "./node_modules/@types"],
     "lib": ["es2020"],
     "noEmit": false,
     "emitDeclarationOnly": false
