@@ -3,8 +3,22 @@ import fs from "fs";
 import path from "path";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-import viteConfig from "../vite.config.js";
 import { nanoid } from "nanoid";
+
+// Simple vite config for production builds
+const viteConfig = {
+  resolve: {
+    alias: {
+      "@": path.resolve(process.cwd(), "client", "src"),
+      "@shared": path.resolve(process.cwd(), "shared"),
+    },
+  },
+  root: path.resolve(process.cwd(), "client"),
+  build: {
+    outDir: path.resolve(process.cwd(), "dist/public"),
+    emptyOutDir: true,
+  },
+};
 
 const viteLogger = createLogger();
 

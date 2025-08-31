@@ -5,7 +5,8 @@
     "moduleResolution": "node16",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-  "outDir": "./dist",
+    "outDir": "./dist",
+    "rootDir": ".",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -21,6 +22,6 @@
     "noEmit": false,
     "emitDeclarationOnly": false
   },
-  "include": ["server/**/*.ts", "shared/**/*.ts", "types/**/*.ts"],
+  "include": ["server/**/*.ts", "shared/**/*.ts", "types/**/*.ts", "vite.config.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "client", "**/*.d.ts", "**/*.js"]
 }

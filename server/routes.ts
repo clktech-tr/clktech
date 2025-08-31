@@ -17,23 +17,14 @@ type Request = ExpressRequest & {
   file?: MulterFile;
 };
 type Response = ExpressResponse;
-type Application = {
-  get: (path: string, ...handlers: Array<any>) => void;
-  post: (path: string, ...handlers: Array<any>) => void;
-  put: (path: string, ...handlers: Array<any>) => void;
-  patch: (path: string, ...handlers: Array<any>) => void;
-  delete: (path: string, ...handlers: Array<any>) => void;
-  use: (path: string | ((req: Request, res: Response, next: NextFunction) => void), ...handlers: Array<any>) => void;
-};
-import type { FileFilterCallback } from 'multer';
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from "http";
 import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage.js';
-import { insertProductSchema, insertOrderSchema, insertContactSchema } from "../shared/schema.runtime.js";
+import { insertProductSchema, insertOrderSchema, insertContactSchema } from './schemas.js';
 import multer from 'multer';
 
 import path from "path";
 import fs from "fs";
-const jwt = require('jsonwebtoken');
+import * as jwt from 'jsonwebtoken';
 import { supabase } from "./supabaseClient.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
@@ -207,7 +198,7 @@ function safeParseJson(val: any) {
   }
 }
 
-export async function registerRoutes(app: Application): Promise<Server> {
+export async function registerRoutes(app: express.Application): Promise<Server> {
   // Serve uploaded files
   app.use("/api/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
   
