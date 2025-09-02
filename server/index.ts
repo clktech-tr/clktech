@@ -84,9 +84,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
-  } else {
-    serveStatic(app);
   }
+  // In production, don't serve static files on Render - that's handled by Vercel
+  // Only serve static files if we detect we're not on Render (e.g., local production testing)
 
   // Serve the app on specified port or default to 5000
   // this serves both the API and the client.
