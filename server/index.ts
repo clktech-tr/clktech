@@ -4,28 +4,53 @@ import type { Request, Response, NextFunction } from 'express';
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 
-// CORS için gerekli middleware
+// CORS configuration
 const cors = (req: Request, res: Response, next: NextFunction) => {
-  // Vercel'deki frontend URL'i
-  const allowedOrigins = ['https://clktechtr.vercel.app', 'https://clktech.vercel.app', 'http://localhost:5000', 'http://localhost:3000'];
+  // List of allowed origins
+  const allowedOrigins = [
+    'https://clktech.vercel.app',
+    'https://www.clktech.vercel.app',
+    'https://clktech-backend.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5000'
+  ];
+
   const origin = req.headers.origin;
   
+  // In development, allow all origins for easier testing
+  if (process.env.NODE_ENV !== 'production') {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    return next();
+  }
+
+  // In production, only allow specific origins
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    // Tüm originlere izin ver (geliştirme için, production'da daha kısıtlayıcı olabilir)
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    return next();
   }
-  
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  next();
+
+  // Block requests from unauthorized origins in production
+  console.warn(`Blocked request from unauthorized origin: ${origin}`);
+  return res.status(403).json({ message: 'Not allowed by CORS' });
 };
 
 const app = express();

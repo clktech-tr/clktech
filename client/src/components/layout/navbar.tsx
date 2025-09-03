@@ -15,7 +15,7 @@ export function Navbar() {
   const navItems = [
     { path: "/", label: t("navbar.home") },
     { path: "/products", label: t("navbar.products") },
-    { path: "/coding-app", label: t("navbar.codingApp") },
+    { path: "/block-coding-simple", label: t("navbar.codingApp") },
     { path: "/about", label: t("navbar.about") },
     { path: "/contact", label: t("navbar.contact") },
   ];

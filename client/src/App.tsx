@@ -8,7 +8,7 @@ import { Footer } from "@/components/layout/footer";
 import Home from "@/pages/home";
 import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
-import CodingApp from "@/pages/coding-app";
+import BlockCoding from "@/pages/block-coding-simple";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Admin from "@/pages/admin";
@@ -25,7 +25,7 @@ function Router() {
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/coding-app" element={<CodingApp />} />
+            <Route path="/block-coding-simple" element={<BlockCoding />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
