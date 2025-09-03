@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 
 declare global {
   interface Window {
@@ -88,7 +89,28 @@ const BlockCodingPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">CLK Tech Blok Kodlama</h1>
-          <Button onClick={() => navigate('/')}>Ana Sayfaya Dön</Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                try {
+                  // Open the CLK Block Code HTML file directly in the browser
+                  const blockCodePath = 'file:///C:/Users/clk/Desktop/github%20proje/clktech/CLK%20Block%20code/index.html';
+                  window.open(blockCodePath, '_blank');
+                } catch (error) {
+                  console.error('Sayfa açılırken hata oluştu:', error);
+                  toast({
+                    title: 'Hata',
+                    description: 'Blok kodlama sayfası açılamadı. Lütfen uygulamanın doğru konumda olduğundan emin olun.',
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              Uygulamayı Aç
+            </Button>
+            <Button onClick={() => navigate('/')}>Ana Sayfaya Dön</Button>
+          </div>
         </div>
         
         <div 
