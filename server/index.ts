@@ -1,13 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import { registerRoutes } from "./routes.js";
 import { setupVite, serveStatic, log } from "./vite.js";
 
 // CORS configuration
-const cors = (req: Request, res: Response, next: NextFunction) => {
-  // List of allowed origins
-  const allowedOrigins = [
+const corsOptions = {
+  origin: [
     'https://clktech.vercel.app',
     'https://www.clktech.vercel.app',
     'https://clktech-backend.onrender.com',
@@ -15,52 +15,22 @@ const cors = (req: Request, res: Response, next: NextFunction) => {
     'http://localhost:5000',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:5000',
-    'https://clktech.vercel.app/',
-    'https://www.clktech.vercel.app/'
-  ];
-
-  // Get origin from headers or referer
-  let origin = '';
-  if (typeof req.headers.origin === 'string') {
-    origin = req.headers.origin;
-  } else if (req.headers.referer) {
-    const referer = Array.isArray(req.headers.referer) ? req.headers.referer[0] : req.headers.referer;
-    origin = referer.replace(/\/+$/, '');
-  }
-  
-  // Always handle preflight requests first
-  if (req.method === 'OPTIONS') {
-    // In development, allow all origins for easier testing
-    if (process.env.NODE_ENV !== 'production' || (origin && allowedOrigins.some(allowed => origin.includes(allowed)))) {
-      res.setHeader('Access-Control-Allow-Origin', origin || '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Max-Age', '86400');
-      return res.status(200).end();
-    }
-    return res.status(403).json({ error: 'Not allowed by CORS' });
-  }
-
-  // For actual requests
-  if (process.env.NODE_ENV !== 'production' || (origin && allowedOrigins.some(allowed => origin.includes(allowed)))) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    return next();
-  }
-
-  // Origin not allowed
-  console.warn('CORS blocked request from origin:', origin);
-  res.status(403).json({ error: 'Not allowed by CORS', origin });
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-HTTP-Method-Override', 'Accept', 'Origin'],
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 const app = express();
+
+// Apply CORS middleware before other middleware
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// CORS middleware'ini uygula
-app.use(cors);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
