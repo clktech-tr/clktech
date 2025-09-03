@@ -14,15 +14,24 @@ const cors = (req: Request, res: Response, next: NextFunction) => {
     'http://localhost:3000',
     'http://localhost:5000',
     'http://127.0.0.1:3000',
-    'http://127.0.0.1:5000'
+    'http://127.0.0.1:5000',
+    'https://clktech.vercel.app/',
+    'https://www.clktech.vercel.app/'
   ];
 
-  const origin = req.headers.origin;
+  // Get origin from headers or referer
+  let origin = '';
+  if (typeof req.headers.origin === 'string') {
+    origin = req.headers.origin;
+  } else if (req.headers.referer) {
+    const referer = Array.isArray(req.headers.referer) ? req.headers.referer[0] : req.headers.referer;
+    origin = referer.replace(/\/+$/, '');
+  }
   
   // Always handle preflight requests first
   if (req.method === 'OPTIONS') {
     // In development, allow all origins for easier testing
-    if (process.env.NODE_ENV !== 'production' || (origin && allowedOrigins.includes(origin))) {
+    if (process.env.NODE_ENV !== 'production' || (origin && allowedOrigins.some(allowed => origin.includes(allowed)))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
@@ -34,7 +43,7 @@ const cors = (req: Request, res: Response, next: NextFunction) => {
   }
 
   // For actual requests
-  if (process.env.NODE_ENV !== 'production' || (origin && allowedOrigins.includes(origin))) {
+  if (process.env.NODE_ENV !== 'production' || (origin && allowedOrigins.some(allowed => origin.includes(allowed)))) {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
     res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -42,7 +51,8 @@ const cors = (req: Request, res: Response, next: NextFunction) => {
   }
 
   // Origin not allowed
-  res.status(403).json({ error: 'Not allowed by CORS' });
+  console.warn('CORS blocked request from origin:', origin);
+  res.status(403).json({ error: 'Not allowed by CORS', origin });
 };
 
 const app = express();
