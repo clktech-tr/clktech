@@ -17,14 +17,13 @@ type Request = ExpressRequest & {
 };
 type Response = ExpressResponse;
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from "http";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage.js';
-import { insertProductSchema, insertOrderSchema, insertContactSchema } from './schemas.js';
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage';
+import { insertProductSchema, insertOrderSchema, insertContactSchema } from './schemas';
 import multer from 'multer';
-
 import path from "path";
 import fs from "fs";
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { supabase } from "./supabaseClient.js";
+import { supabase } from "./supabaseClient";
 
 const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
 
@@ -205,15 +204,36 @@ function safeParseJson(val: any) {
 }
 
 export async function registerRoutes(app: Application): Promise<Server> {
+  // Create HTTP server
+  const server = require('http').createServer(app);
+  
+  // Apply CORS to all routes
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    
+    next();
+  });
+
   // Serve uploaded files
   app.use("/api/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
   
   // Serve download files
   app.use("/downloads", express.static(path.join(process.cwd(), "public", "downloads")));
 
-  // Health check endpoint for Render
+  // Health check endpoint
   app.get("/api/health", (req: Request, res: Response) => {
-    res.status(200).json({ status: "ok", message: "Server is running" });
+    res.status(200).json({ 
+      status: "ok", 
+      message: "Server is running",
+      timestamp: new Date().toISOString()
+    });
   });
 
   // Public API routes
