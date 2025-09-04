@@ -14,8 +14,20 @@ if (fs.existsSync(distDir)) {
 
 console.log('Building backend for production...');
 
+// Create required directories if they don't exist
+const requiredDirs = [
+  path.join(distDir, 'server'),
+  path.join(distDir, 'shared')
+];
+
+for (const dir of requiredDirs) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
 try {
-  // Build TypeScript files to JavaScript
+  console.log('Compiling TypeScript...');
   execSync('npx tsc --project tsconfig-backend.json', { 
     stdio: 'inherit',
     cwd: rootDir 

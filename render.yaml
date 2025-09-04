@@ -2,8 +2,9 @@ services:
   - type: web
     name: clktech-backend
     env: node
-    buildCommand: cd .. && npm install && npm run build:backend
-    startCommand: node dist/server/index.js
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    workingDir: /opt/render/project/src/server
     envVars:
       - key: NODE_ENV
         value: production
