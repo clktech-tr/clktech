@@ -35,11 +35,16 @@ export default function CodingApp() {
               {t("codingApp.visualProgrammingDesc")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a href={settings?.downloadUrl || "/downloads/clk-block-code-windows.exe"} download>
-                <Button size="lg" className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200 flex items-center gap-2">
-                  <span className="font-semibold">{t("codingApp.downloadBtn", "İndir")}</span>
-                  </Button>
-                </a>
+                <Button 
+                  onClick={() => {
+                    // Launch the CLK Block Code application
+                    window.location.href = 'file:///C:/Users/clk/Desktop/github%20proje/clktech/launch_clk_block_code.bat';
+                  }}
+                  size="lg" 
+                  className="bg-gradient-to-r from-[#f59e42] to-[#34d399] text-white font-semibold rounded-lg shadow hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                >
+                  <span className="font-semibold">Uygulamayı Aç</span>
+                </Button>
               </div>
             <div className="mt-4">
               <span className="inline-block bg-orange-500/90 text-white text-xs font-semibold px-3 py-1 rounded-full shadow animate-pulse">

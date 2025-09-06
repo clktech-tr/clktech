@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; img-src 'self' data: https:; connect-src 'self' https:">
+    <link rel="icon" type="image/x-icon" href="img/clklogo.png">
+    <link rel="apple-touch-icon" href="img/clklogo.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Block Code</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.2.2/blockly_compressed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.2.2/blocks_compressed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.2.2/javascript_compressed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.2.2/msg/tr.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0D0C0A;
+            color: #F9F8F3;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        /* Tüm başlıklar için */
+        
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Navbar için */
+        
+        .navbar-brand {
+            font-weight: normal;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+        /* Butonlar için */
+        
+        .btn,
+        .btn-navbar {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Dropdown menü için */
+        
+        .dropdown-item {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Modal başlıkları için */
+        
+        .modal-content h2 {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Kart başlıkları için */
+        
+        .card-item h4 {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Seçili robot gösterimi için */
+        
+        #selectedRobotDisplay h4 {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Accordion başlıkları için */
+        
+        .accordion-button {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        /* Kod önizleme için */
+        
+        .code-preview {
+            background-color: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            color: #F9F8F3;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            height: 50vh;
+            overflow-y: auto;
+            /* Custom Scrollbar Styles */
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: #555 #333;
+            /* thumb track */
+        }
+        
+        .code-preview::-webkit-scrollbar {
+            width: 8px;
+            /* Dikey kaydırma çubuğunun genişliği */
+        }
+        
+        .code-preview::-webkit-scrollbar-track {
+            background: #333;
+            /* Kaydırma çubuğu yolu rengi */
+            border-radius: 10px;
+        }
+        
+        .code-preview::-webkit-scrollbar-thumb {
+            background-color: #555;
+            /* Kaydırma çubuğu rengi */
+            border-radius: 10px;
+            border: 2px solid #333;
+            /* Kaydırma çubuğu kenarlığı */
+        }
+        
+        .code-preview::-webkit-scrollbar-thumb:hover {
+            background-color: #777;
+            /* Hover rengi */
+        }
+        /* Çıktı alanı için */
+        
+        .output-content {
+            background-color: #0D0C0A;
+            color: #F9F8F3;
+            height: 25vh;
+            overflow-y: auto;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            /* Custom Scrollbar Styles */
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: #555 #333;
+            /* thumb track */
+        }
+        
+        .output-content::-webkit-scrollbar {
+            width: 8px;
+            /* Dikey kaydırma çubuğunun genişliği */
+        }
+        
+        .output-content::-webkit-scrollbar-track {
+            background: #333;
+            /* Kaydırma çubuğu yolu rengi */
+            border-radius: 10px;
+        }
+        
+        .output-content::-webkit-scrollbar-thumb {
+            background-color: #555;
+            /* Kaydırma çubuğu rengi */
+            border-radius: 10px;
+            border: 2px solid #333;
+            /* Kaydırma çubuğu kenarlığı */
+        }
+        
+        .output-content::-webkit-scrollbar-thumb:hover {
+            background-color: #777;
+            /* Hover rengi */
+        }
+        
+        .navbar {
+            background-color: #0D0C0A;
+            border-bottom: 1px solid #222;
+            height: 84px;
+            /* 56px * 1.5 */
+            display: flex;
+            align-items: center;
+            -webkit-app-region: drag;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        .sidebar {
+            background-color: #0D0C0A;
+            border-right: 1px solid #222;
+            padding: 15px;
+            width: 200px;
+            box-sizing: border-box;
+            color: #F9F8F3;
+            position: fixed;
+            left: -200px;
+            top: 84px;
+            /* Navbar yüksekliği kadar */
+            bottom: 0;
+            transition: left 0.3s ease-in-out;
+            z-index: 1000;
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .workspace-area {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            background-color: #f0f0f0;
+            overflow: hidden;
+            position: relative;
+            /* Position relative eklendi */
+        }
+        
+        #blocklyDiv {
+            flex: 2;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            overflow: hidden;
+            width: 100%;
+            /* Genişlik 100% yapıldı */
+        }
+        
+        .code-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 15px;
+            background-color: #1a1a1a;
+            /* Dark background for code area */
+            border: 1px solid #222;
+            border-radius: 8px;
+        }
+        
+        .output-area {
+            background: #2D2D2D;
+            color: #ABB2BF;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .output-header {
+            background-color: #222;
+            color: #FEA500;
+            border-bottom: 1px solid #333;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+        }
+        
+        .navbar-brand img {
+            height: 75px;
+            /* 50px * 1.5 */
+            margin-right: 15px;
+        }
+        
+        .navbar-brand,
+        .navbar-nav .nav-item .btn-navbar {
+            color: #F9F8F3 !important;
+        }
+        
+        .nav-item .btn {
+            margin-left: 10px;
+        }
+        
+        .btn-navbar {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+        
+        .btn-navbar:hover {
+            background-color: #FEA500;
+            color: #0D0C0A !important;
+        }
+        
+        .dropdown-menu {
+            background-color: #0D0C0A;
+            border: 1px solid #222;
+        }
+        
+        .dropdown-item {
+            color: #F9F8F3;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #FEA500;
+            color: #0D0C0A;
+        }
+        
+        .card {
+            margin: 15px;
+        }
+        /* Modal Styles */
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: rgba(26, 26, 26, 0.5);
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: auto;
+            min-width: 300px;
+            max-width: 80%;
+            position: relative;
+            color: #F9F8F3;
+            text-align: center;
+        }
+        
+        #robotCardModal .modal-content,
+        #customAlertModal .modal-content,
+        #customConfirmModal .modal-content {
+            transform: translate(-50%, -50%);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #F9F8F3;
+            font-size: 24px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .close-button:hover,
+        .close-button:focus {
+            color: #FEA500;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .add-button,
+        .btn-primary {
+            background-color: #FEA500;
+            color: #0D0C0A;
+            border: none;
+            padding: 8px 12px;
+            /* %80 küçültme */
+            border-radius: 4px;
+            /* %80 küçültme */
+            cursor: pointer;
+            font-size: 0.9em;
+            /* %80 küçültme */
+            margin-top: 8px;
+            /* %80 küçültme */
+        }
+        
+        .add-button:hover,
+        .btn-primary:hover {
+            background-color: #e69500;
+            /* Slightly darker orange */
+            color: #0D0C0A;
+        }
+        
+        .robot-card-selector h3 {
+            color: #F9F8F3;
+            /* Consistent with main text color */
+            margin-bottom: 10px;
+            font-size: 1em;
+            /* Daha küçük font boyutu */
+        }
+        
+        .card-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            /* Kartları yatayda ortala */
+            gap: 12px;
+            /* 15px * 0.8 = 12px */
+            margin-top: 16px;
+            /* %80 küçültme */
+        }
+        
+        .card-item {
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: rgba(26, 26, 26, 0.6);
+            color: #F9F8F3;
+        }
+        
+        .card-item:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .card-item.selected {
+            border: 2px solid #FEA500;
+            background-color: rgba(51, 51, 51, 0.6);
+        }
+        
+        .card-item img {
+            max-width: 80px;
+            /* 100px * 0.8 = 80px */
+            height: auto;
+            margin-bottom: 8px;
+            /* 10px * 0.8 = 8px */
+        }
+        
+        .card-item h4 {
+            margin: 0;
+            color: #F9F8F3;
+            font-size: 1em;
+            /* Biraz küçült */
+        }
+        /* Specific adjustments for existing elements with hardcoded colors */
+        
+        #selectedRobotDisplay h4,
+        #selectedRobotDisplay p {
+            color: #F9F8F3 !important;
+        }
+        
+        #disconnectRobotButton {
+            background-color: #dc3545;
+            /* Keep red for disconnect */
+            color: #F9F8F3;
+            padding: 8px 12px;
+            /* %80 küçültme */
+            border-radius: 4px;
+            /* %80 küçültme */
+            font-size: 0.9em;
+            /* %80 küçültme */
+            display: block;
+            /* Blok seviyesine getir */
+            margin: 0 auto;
+            /* Yatayda ortala */
+        }
+        
+        #disconnectRobotButton:hover {
+            background-color: #c82333;
+        }
+        
+        #selectedRobotDisplay {
+            text-align: center;
+            /* İçeriği ortala */
+            padding: 12px;
+            /* %80 küçültme */
+            border-radius: 6px;
+            /* %80 küçültme */
+            margin-top: 16px;
+            /* %80 küçültme */
+        }
+        
+        #selectedRobotDisplay img {
+            margin: 0 auto 20px auto;
+            /* Üstte 0, altta 20px boşluk, yatayda ortala */
+            display: block;
+            /* Ortalamak için blok seviyesi yap */
+            height: 72px;
+            /* 48px * 1.5 */
+            max-width: 120px;
+            /* 80px * 1.5 */
+        }
+        
+        #selectedRobotDisplay h4 {
+            font-size: 1em;
+            /* Daha küçük font boyutu */
+            margin-bottom: 4px;
+            /* Yazılar arasına boşluk */
+        }
+        
+        #selectedRobotDisplay p {
+            font-size: 12px;
+            /* Okunabilir font boyutu */
+            margin-bottom: 12px;
+            /* Butondan önce boşluk */
+        }
+        
+        #robotCardSelectionView h2,
+        #deviceSelectionView h2 {
+            font-size: 1.4em;
+            /* Başlık font boyutunu ayarla */
+            margin-bottom: 10px;
+            /* Boşluk ekle */
+        }
+        
+        #deviceSelectionView p {
+            font-size: 0.9em;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .right-panel {
+            width: 25vw;
+            /* Panel genişliği ekranın %25'i kadar */
+            background-color: #0D0C0A;
+            border-left: 1px solid #222;
+            position: fixed;
+            right: -25vw;
+            /* Başlangıçta sağda gizli */
+            top: 84px;
+            bottom: 0;
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .right-panel.open {
+            right: 0;
+        }
+        
+        #addRobotButton {
+            width: 24px;
+            /* Daha da küçük genişlik */
+            height: 24px;
+            /* Daha da küçük yükseklik */
+            padding: 0;
+            /* İç dolguyu sıfırla */
+            font-size: 0.8em;
+            /* İkon boyutunu ayarla */
+            display: flex;
+            /* İçeriği ortalamak için flex kullan */
+            justify-content: center;
+            /* Yatayda ortala */
+            align-items: center;
+            /* Dikeyde ortala */
+        }
+        
+        #toggleRightPanel {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            margin-top: -21px;
+            z-index: 1001;
+            background-color: #FEA500;
+            color: #0D0C0A;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            padding: 10px;
+            cursor: pointer;
+            transition: right 0.3s ease-in-out;
+        }
+        
+        .right-panel.open~#toggleRightPanel {
+            right: 25vw;
+            /* Panel açıkken buton panelin kenarına gelir */
+        }
+        
+        #toggleLeftPanel {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            /* Navbar yüksekliği kadar */
+            margin-top: -21px;
+            /* Kendi yüksekliğinin yarısı */
+            z-index: 1001;
+            background-color: #FEA500;
+            color: #0D0C0A;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 10px;
+            cursor: pointer;
+            transition: left 0.3s ease-in-out;
+        }
+        
+        #toggleLeftPanel:hover {
+            background-color: #e69500;
+        }
+        
+        .navbar .container-fluid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .navbar-collapse {
+            display: flex;
+            justify-content: center;
+            /* Butonları yatayda ortala */
+            align-items: flex-end;
+            /* Butonları alta hizala */
+            flex-grow: 1;
+            /* Mevcut alanı kaplamasını sağla */
+            height: 100%;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            flex-direction: row;
+            padding-left: 0;
+            margin-bottom: 0;
+            /* Bootstrap'in varsayılan margin'ini kaldır */
+        }
+        
+        .navbar-nav .nav-item {
+            margin-bottom: 0;
+            /* Öğeler arasındaki boşluğu kaldır */
+        }
+        
+        #customAlertOkButton,
+        #customConfirmOkButton,
+        #customConfirmCancelButton {
+            padding: 8px 16px;
+            margin: 10px 5px;
+            font-size: 14px;
+            min-width: 80px;
+            max-width: 120px;
+            color: #fff;
+            display: inline-block;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        #customAlertMessage,
+        #customConfirmMessage {
+            margin: 15px 0;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        #robotCardModal .modal-content,
+        #deviceSelectionView .modal-content {
+            background-color: rgba(26, 26, 26, 0.6);
+        }
+        /* Butonların etrafındaki gri çerçeveyi kaldır */
+        
+        .btn,
+        button,
+        .btn-navbar,
+        .add-button,
+        .btn-primary,
+        .dropdown-toggle,
+        .accordion-button,
+        .card-item button,
+        .modal-content button {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        .window-controls button i {
+            transition: color 0.2s;
+        }
+        
+        .window-controls button:hover i {
+            color: #FEA500 !important;
+        }
+        
+        .window-controls button,
+        .btn-navbar,
+        .dropdown-toggle,
+        .dropdown-menu,
+        .nav-item .btn {
+            -webkit-app-region: no-drag;
+        }
+        
+        .btn-navbar-modern {
+            background: rgba(255, 255, 255, 0.07);
+            color: #F9F8F3;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 500;
+            font-size: 13px;
+            border: none;
+            border-radius: 10px;
+            padding: 5px 14px;
+            margin: 0 3px;
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        
+        .btn-navbar-modern:hover,
+        .btn-navbar-modern:focus {
+            background: #FEA500;
+            color: #0D0C0A;
+            box-shadow: 0 4px 16px 0 rgba(254, 165, 0, 0.10);
+        }
+        /* Serial monitör input alanı ve butonları için responsive ve genişlik ayarı */
+        
+        .serial-input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100vw;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 1px 0 1px 0;
+            flex-wrap: wrap;
+            margin-top: 2px;
+            overflow-x: auto;
+            text-align: center;
+        }
+        
+        #baudRateSelect,
+        #sendSerialMessageBtn,
+        #collapseSerialMonitor .btn,
+        #collapseSerialMonitor button,
+        #serialMessageInput {
+            margin: 0 !important;
+            height: 32px !important;
+            line-height: normal !important;
+            vertical-align: middle !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        #baudRateSelect {
+            min-width: 60px;
+            width: auto;
+            max-width: 180px;
+            font-size: 11px;
+            background: #222 !important;
+            color: #fff !important;
+            border: 1px solid #444 !important;
+            border-radius: 6px !important;
+            padding: 0 6px !important;
+            white-space: normal !important;
+            text-overflow: ellipsis !important;
+            overflow: hidden !important;
+        }
+        
+        #serialMessageInput {
+            flex: 2 1 120px;
+            min-width: 60px;
+            max-width: 100%;
+            font-size: 11px;
+            background: #222 !important;
+            color: #fff !important;
+            border: 1px solid #444 !important;
+            border-radius: 6px !important;
+            padding: 0 6px !important;
+        }
+        
+        #sendSerialMessageBtn,
+        #collapseSerialMonitor .btn,
+        #collapseSerialMonitor button {
+            min-width: 60px;
+            width: auto;
+            max-width: 180px;
+            font-size: 11px;
+            padding: 0 6px !important;
+            background: #222 !important;
+            color: #fff !important;
+            border-radius: 6px !important;
+            border: 1px solid #444 !important;
+            transition: background 0.2s, color 0.2s;
+            box-shadow: none !important;
+            white-space: normal !important;
+            text-overflow: ellipsis !important;
+            overflow: hidden !important;
+        }
+        
+        #sendSerialMessageBtn:hover,
+        #collapseSerialMonitor .btn:hover,
+        #collapseSerialMonitor button:hover {
+            background: #FEA500 !important;
+            color: #0D0C0A !important;
+        }
+        
+        @media (max-width: 900px) {
+            #baudRateSelect,
+            #sendSerialMessageBtn,
+            #collapseSerialMonitor .btn,
+            #collapseSerialMonitor button,
+            #serialMessageInput {
+                height: 28px !important;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .serial-input-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            #baudRateSelect,
+            #sendSerialMessageBtn,
+            #collapseSerialMonitor .btn,
+            #collapseSerialMonitor button,
+            #serialMessageInput {
+                height: 24px !important;
+            }
+        }
+        /* Navbar butonları için çerçevesiz ve sadece yazıya hover efekti */
+        
+        .navbar .btn,
+        .navbar .btn-navbar,
+        .navbar .btn-navbar-modern,
+        .navbar-nav .nav-item .btn {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            background: none !important;
+            color: #F9F8F3 !important;
+            transition: color 0.2s;
+            padding: 5px 14px;
+        }
+        
+        .navbar .btn:hover,
+        .navbar .btn-navbar:hover,
+        .navbar .btn-navbar-modern:hover,
+        .navbar-nav .nav-item .btn:hover {
+            color: #FEA500 !important;
+            background: none !important;
+        }
+        /* Sağ/sol panel açma ikonları aynı kalsın */
+        
+        #deviceList {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        /* Serial monitör alt panel paddingini azalt */
+        
+        #collapseSerialMonitor .accordion-body.p-0 .serial-input-container,
+        #collapseSerialMonitor .serial-input-container,
+        #collapseSerialMonitor .p-3 {
+            padding-top: 1px !important;
+            padding-bottom: 1px !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg" style="position: relative; z-index: 1050;">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="#">
+                <img src="img/clklogo.png" alt="Logo" style="height: 75px;"> <span style="margin-left: 15px;">Block Code</span>
+            </a>
+            <div class="window-controls" style="position: fixed; top: 10px; right: 16px; display: flex; gap: 6px; z-index: 2000;">
+                <button id="minimizeBtn" style="background: none; border: none; color: #fff; font-size: 16px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: normal;" title="Küçült"><i class="fa-solid fa-window-minimize" style="font-weight: normal;"></i></button>
+                <button id="maximizeBtn" style="background: none; border: none; color: #fff; font-size: 16px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: normal;" title="Tam Ekran"><i class="fa-solid fa-window-maximize" style="font-weight: normal;"></i></button>
+                <button id="closeBtn" style="background: none; border: none; color: #fff; font-size: 18px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: normal;" title="Kapat"><i class="fa-regular fa-circle-xmark" style="font-weight: normal;"></i></button>
+            </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav w-100 justify-content-center align-items-end">
+                    <li class="nav-item">
+                        <button class="btn btn-navbar-modern" id="openFileButton" onclick="openFileDialog()"><i class="fas fa-folder-open"></i> Aç</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-navbar-modern" onclick="saveCode()"><i class="fas fa-save"></i> Kaydet</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-navbar-modern" onclick="generateCode()"><i class="fas fa-code"></i> Kodu Oluştur</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-navbar-modern" id="compileButton" onclick="compileCode()"><i class="fas fa-check"></i> Derle</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-navbar-modern" onclick="uploadToArduino()"><i class="fas fa-upload"></i> <span id="uploadButtonText">MazeX Yükle</span></button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-navbar-modern" id="clearWorkspace" onclick="clearWorkspace()"><i class="fas fa-eraser"></i> Temizle</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="sidebar p-3 bg-dark text-white">
+            <div class="robot-card-selector d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 mb-0">Robot Kartı</h3>
+                <button id="addRobotButton" class="btn btn-primary btn-sm rounded-circle" title="Robot Kartı Ekle">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="selectedRobotDisplay" style="display: none; margin-top: 20px;">
+                <img id="robotCardImage" src="" alt="Robot Kartı" style="height: 60px; display: none;">
+                <h4 style="color: #F9F8F3;">Seçili Robot: <span id="currentRobotName"></span></h4>
+                <p style="color: #F9F8F3; margin-bottom: 4px;">Port: <span id="currentPortName">-</span></p>
+                <p style="color: #F9F8F3;">Durum: <span id="connectionStatus">Bağlı Değil</span></p>
+                <button id="disconnectRobotButton" class="add-button" style="background-color: #dc3545;">Bağlantıyı Kes</button>
+            </div>
+        </div>
+
+        <button id="toggleLeftPanel" class="btn btn-navbar" title="Sol Panel">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <div class="workspace-area d-flex flex-grow-1">
+            <div id="mainUploadStatusMessage" style="margin: 10px; padding: 10px; background-color: #333; color: #F9F8F3; border-radius: 5px; text-align: center; display: none; position: absolute; width: calc(100% - 20px); z-index: 100;"></div>
+            <div id="blocklyDiv" class="flex-grow-1"></div>
+            <div id="rightPanel" class="right-panel">
+                <div class="accordion" id="codeOutputAccordion">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header" id="headingArduinoCode">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArduinoCode" aria-expanded="false" aria-controls="collapseArduinoCode">
+                                <i class="fas fa-code me-2"></i> Arduino Kodu
+                            </button>
+                        </h2>
+                        <div id="collapseArduinoCode" class="accordion-collapse collapse" aria-labelledby="headingArduinoCode" data-bs-parent="#codeOutputAccordion">
+                            <div class="accordion-body bg-dark p-0">
+                                <pre id="arduinoCode" class="code-preview p-3"></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bg-dark border-secondary mt-2">
+                        <h2 class="accordion-header" id="headingSerialMonitor">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSerialMonitor" aria-expanded="false" aria-controls="collapseSerialMonitor">
+                                <i class="fas fa-terminal me-2"></i> Serial Monitör
+                            </button>
+                        </h2>
+                        <div id="collapseSerialMonitor" class="accordion-collapse collapse" aria-labelledby="headingSerialMonitor" data-bs-parent="#codeOutputAccordion">
+                            <div class="accordion-body bg-dark p-0">
+                                <div id="serialOutput" class="output-content p-3"></div>
+                                <div class="serial-input-container p-3 d-flex align-items-center">
+                                    <select id="baudRateSelect" class="form-select form-select-sm bg-dark text-white me-2" style="width: auto;" aria-label="Baud Rate Seçimi">
+                                        <option value="9600">9600 Baud</option>
+                                        <option value="19200">19200 Baud</option>
+                                        <option value="38400">38400 Baud</option>
+                                        <option value="57600">57600 Baud</option>
+                                        <option value="115200" selected>115200 Baud</option>
+                                    </select>
+                                    <input type="text" id="serialMessageInput" class="form-control form-control-sm bg-dark text-white me-2 flex-grow-1" placeholder="Mesaj gönder...">
+                                    <button id="sendSerialMessageBtn" class="btn btn-primary btn-sm">Gönder</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item bg-dark border-secondary mt-2">
+                        <h2 class="accordion-header" id="headingConsoleOutput">
+                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseConsoleOutput" aria-expanded="false" aria-controls="collapseConsoleOutput">
+                                <i class="fas fa-laptop-code me-2"></i> Console Output
+                            </button>
+                        </h2>
+                        <div id="collapseConsoleOutput" class="accordion-collapse collapse" aria-labelledby="headingConsoleOutput" data-bs-parent="#codeOutputAccordion">
+                            <div class="accordion-body bg-dark p-0">
+                                <div id="consoleOutput" class="output-content p-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="toggleRightPanel" class="btn btn-navbar" title="Çıktı Paneli">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <!-- Robot Kartı Seçim Modalı -->
+    <div id="robotCardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="robotCardSelectionView">
+                <h2>Robot Kartı Seç</h2>
+                <div id="robotCardList" class="card-list">
+                    <!-- Robot kartları buraya JavaScript ile yüklenecek -->
+                </div>
+            </div>
+            <div id="deviceSelectionView" style="display: none;">
+                <h2>Bağlı Cihazları Seç</h2>
+                <p id="deviceSelectionMessage">Cihazlar aranıyor...</p>
+                <div id="deviceList" class="card-list">
+                    <!-- Bağlı cihazlar buraya JavaScript ile yüklenecek -->
+                </div>
+                <button id="refreshDevicesButton" class="add-button">Cihazları Yenile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="customAlertModal" class="modal">
+        <div class="modal-content">
+            <h2 id="customAlertTitle"></h2>
+            <p id="customAlertMessage"></p>
+            <div class="modal-buttons">
+                <button id="customAlertOkButton" class="add-button">Tamam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="customConfirmModal" class="modal">
+        <div class="modal-content">
+            <h2 id="customConfirmTitle"></h2>
+            <p id="customConfirmMessage"></p>
+            <div class="modal-buttons">
+                <button id="customConfirmOkButton" class="add-button">Evet</button>
+                <button id="customConfirmCancelButton" class="add-button" style="background-color: #555;">Hayır</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

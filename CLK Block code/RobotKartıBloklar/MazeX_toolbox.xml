@@ -1,0 +1,94 @@
+<xml>
+  <category name="Hareket">
+    <block type="robot_ileri" />
+    <block type="robot_geri" />
+    <block type="robot_sol" />
+    <block type="robot_sag" />
+    <block type="robot_dur" />
+    <block type="robot_hiz" />
+    <block type="robot_standby" />
+  </category>
+  <category name="Giriş/Çıkış">
+    <block type="read_digital_pin">
+      <field name="PIN">Ön Sensör</field>
+    </block>
+    <block type="read_analog_pin">
+      <field name="PIN">Ön Sensör</field>
+    </block>
+    <block type="write_digital_pin">
+      <field name="PIN">Dip Switch 1</field>
+    </block>
+    <block type="write_analog_pin">
+      <field name="PIN">D9</field>
+    </block>
+    <block type="logic_high_low" />
+    <block type="set_pin_mode">
+      <field name="PIN">A6</field>
+      <field name="MODE">INPUT</field>
+    </block>
+    <block type="fan_control">
+      <field name="STATE">HIGH</field>
+    </block>
+  </category>
+  <category name="Seri Port">
+    <block type="serial_begin">
+      <field name="BAUD">9600</field>
+    </block>
+    <block type="serial_print" />
+    <block type="serial_println" />
+    <block type="serial_read" />
+    <block type="serial_available" />
+  </category>
+  <category name="Kontrol">
+    <block type="controls_if" />
+    <block type="controls_if_else" />
+    <block type="controls_repeat_ext" />
+    <block type="controls_for" />
+    <block type="controls_forever" />
+    <block type="controls_repeat_until" />
+    <block type="controls_flow_statements" />
+  </category>
+  <category name="İşlemler">
+    <block type="math_number" />
+    <block type="operator_add" />
+    <block type="operator_subtract" />
+    <block type="operator_multiply" />
+    <block type="operator_divide" />
+    <block type="operator_random" />
+    <block type="operator_gt" />
+    <block type="operator_lt" />
+    <block type="operator_equals" />
+    <block type="operator_and" />
+    <block type="operator_or" />
+    <block type="operator_not" />
+    <block type="math_map" />
+    <block type="math_constrain" />
+    <block type="math_abs" />
+    <block type="math_min" />
+    <block type="math_max" />
+    <block type="logic_boolean_tr" />
+  </category>
+  <category name="Zaman">
+    <block type="delay_miliseconds" />
+    <block type="delay_microseconds" />
+    <block type="millis" />
+    <block type="micros" />
+    <block type="wait_forever" />
+  </category>
+  <category name="Metin">
+    <block type="text" />
+  </category>
+  <category name="Değişkenler">
+    <block type="variable_create" />
+    <block type="variable_get" />
+    <block type="variable_set" />
+    <block type="variable_set_typed" />
+  </category>
+</xml>
+<!-- Açılır pencere seçenekleri: 
+Sensörler: Ön Sensör, Sağ Çapraz Sensör, Sol Çapraz Sensör, Sağ Sensör, Sol Sensör, Zemin Sensör, A6, A7
+Dijital Pinler: Dip Switch 1, Dip Switch 2, Start Butonu, Standby, D8, D4, D7
+Analog Pinler: A0-A7
+Fan: Fan Çıkışı
+Boş pinler: A6, A7
+--> 

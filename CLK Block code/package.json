@@ -1,0 +1,49 @@
+{
+    "name": "Clk_Block_Code",
+    "version": "1.0.0",
+    "description": "CLK Block Code",
+    "main": "main.js",
+    "author": "CLK",
+    "license": "Proprietary",
+    "scripts": {
+        "start": "electron .",
+        "dist": "electron-builder"
+    },
+    "dependencies": {
+        "serialport": "^12.0.0"
+    },
+    "devDependencies": {
+        "electron": "^29.0.0",
+        "electron-builder": "^24.0.0"
+    },
+    "build": {
+        "appId": "com.clk.block",
+        "productName": "CLK Block Code",
+        "files": [
+            "**/*",
+            "!**/node_modules/*",
+            "!package-lock.json",
+            "!npm-debug.log",
+            "images/**/*"
+        ],
+        "extraResources": [
+            "bin"
+        ],
+        "win": {
+            "target": [
+                "nsis",
+                "portable"
+            ],
+            "icon": "img/clklogo.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "CLK Block Code",
+            "include": "installer.nsh"
+        }
+    }
+}

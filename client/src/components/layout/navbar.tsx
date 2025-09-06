@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import clkLogo from "@assets/clklogo_1752565795957.png";
+const clkLogo = "/clklogo.png";
 import { useTranslation } from "react-i18next";
 
 export function Navbar() {
@@ -15,7 +15,7 @@ export function Navbar() {
   const navItems = [
     { path: "/", label: t("navbar.home") },
     { path: "/products", label: t("navbar.products") },
-    { path: "/coding-app", label: t("navbar.codingApp") },
+    { path: "/block-coding-simple", label: t("navbar.codingApp") },
     { path: "/about", label: t("navbar.about") },
     { path: "/contact", label: t("navbar.contact") },
   ];

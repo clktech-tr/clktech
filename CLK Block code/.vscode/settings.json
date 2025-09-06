@@ -1,0 +1,8 @@
+{
+    "compile-hero.disable-compile-files-on-did-save-code": true,
+    "C_Cpp.default.compilerPath": "c:\\Users\\clk\\AppData\\Local\\Programs\\Arduino IDE\\Arduino IDE.exe"
+}
+{
+    "ai.provider": "deepseek",
+    "ai.deepseek.apiKey": "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"
+  }
