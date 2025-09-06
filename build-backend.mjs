@@ -4,7 +4,9 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-const rootDir = process.cwd();
+// Determine root directory - if we're in server folder, go up one level
+const currentDir = process.cwd();
+const rootDir = currentDir.endsWith('server') ? path.dirname(currentDir) : currentDir;
 const distDir = path.join(rootDir, 'dist');
 
 // Clean dist directory
