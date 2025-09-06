@@ -1,5 +1,4 @@
-import express from 'express';
-import type { Express, Request as ExpressRequest, Response as ExpressResponse, NextFunction } from 'express';
+import express, { Express, Request as ExpressRequest, Response as ExpressResponse, NextFunction, Application, RequestHandler } from 'express';
 
 interface MulterFile {
   fieldname: string;
@@ -18,16 +17,20 @@ type Request = ExpressRequest & {
 };
 type Response = ExpressResponse;
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from "http";
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage.js';
-import { insertProductSchema, insertOrderSchema, insertContactSchema } from './schemas.js';
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getOrders, getOrder, createOrder, updateOrder, deleteOrder, getContacts, createContact, getAdminByUsername, createAdmin } from './storage';
+import { insertProductSchema, insertOrderSchema, insertContactSchema } from './schemas';
 import multer from 'multer';
-
 import path from "path";
 import fs from "fs";
-import * as jwt from 'jsonwebtoken';
-import { supabase } from "./supabaseClient.js";
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { supabase } from "./supabaseClient";
 
 const JWT_SECRET = process.env.JWT_SECRET || "clktech_secret_key";
+
+// Extend Express Request type to include user
+interface AuthenticatedRequest extends ExpressRequest {
+  user?: JwtPayload;
+}
 
 // Configure multer for file uploads
 const uploadsDir = path.join(process.cwd(), "public", "uploads");
@@ -128,20 +131,22 @@ const adminAuth = async (req: Request, res: Response, next: any) => {
 
 // JWT ile admin doğrulama middleware
 const adminJwtAuth = (req: Request, res: Response, next: any) => {
-  const authHeader = req.headers["authorization"];
-  console.log("Authorization header:", authHeader); // DEBUG LOG
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Authentication required' });
   }
-  const token = authHeader.split(" ")[1];
+
+  const token = authHeader.split(' ')[1];
+  
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    console.log("JWT decoded:", decoded); // DEBUG LOG
-    (req as any).admin = decoded;
+    // Use type assertion to handle JWT.verify
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    (req as AuthenticatedRequest).user = decoded;
     next();
-  } catch (err) {
-    console.log("JWT error:", err); // DEBUG LOG
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch (error) {
+    console.error('JWT verification error:', error);
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
@@ -198,20 +203,64 @@ function safeParseJson(val: any) {
   }
 }
 
-export async function registerRoutes(app: express.Application): Promise<Server> {
+export async function registerRoutes(app: Application): Promise<Server> {
+  // Create HTTP server
+  const server = createServer(app);
+  
+  // Apply CORS to all routes
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    
+    next();
+  });
+
   // Serve uploaded files
   app.use("/api/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
   
   // Serve download files
   app.use("/downloads", express.static(path.join(process.cwd(), "public", "downloads")));
 
-  // Health check endpoint for Render
+  // Health check endpoint
   app.get("/api/health", (req: Request, res: Response) => {
-    res.status(200).json({ status: "ok", message: "Server is running" });
+    res.status(200).json({ 
+      status: "ok", 
+      message: "Server is running",
+      timestamp: new Date().toISOString()
+    });
   });
 
   // Public API routes
   
+  // Get site settings (public)
+  app.get('/api/settings', async (req: Request, res: Response) => {
+    try {
+      const { data, error } = await supabase.from('settings').select('*').single();
+      if (error) {
+        console.error('Settings error:', error);
+        // Return default settings if not found
+        return res.json({
+          siteName: 'CLK Tech',
+          siteDescription: 'Electronics and Technology',
+          contactEmail: 'info@clktech.com',
+          phone: '',
+          address: '',
+          socialMedia: {}
+        });
+      }
+      res.json(data);
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+      res.status(500).json({ message: 'Failed to fetch settings' });
+    }
+  });
+
   // Get all products
   app.get("/api/products", async (req: Request, res: Response) => {
     try {
@@ -282,7 +331,7 @@ export async function registerRoutes(app: express.Application): Promise<Server> 
     
     // Sabit admin bilgileri ile kontrol et
     if (email === 'admin@clktech.com' && password === 'admin') {
-      const token = jwt.sign({ email: 'admin@clktech.com', id: 1 }, JWT_SECRET, { expiresIn: "2h" });
+      const token = jwt.sign({ email: 'admin@clktech.com', id: 1 }, JWT_SECRET, { expiresIn: "2h" }) as string;
       return res.json({ message: "Login successful", token, user: { id: 1, email: 'admin@clktech.com' } });
     }
     
@@ -307,7 +356,7 @@ export async function registerRoutes(app: express.Application): Promise<Server> 
       }
       
       // JWT oluştur
-      const token = jwt.sign({ email: (data as any).email, id: (data as any).id }, JWT_SECRET, { expiresIn: "2h" });
+      const token = jwt.sign({ email: (data as any).email, id: (data as any).id }, JWT_SECRET, { expiresIn: "2h" }) as string;
       return res.json({ message: "Login successful", token, user: { id: (data as any).id, email: (data as any).email } });
     } catch (err) {
       console.error("Login error:", err);

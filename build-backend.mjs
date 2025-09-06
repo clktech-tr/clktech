@@ -14,9 +14,25 @@ if (fs.existsSync(distDir)) {
 
 console.log('Building backend for production...');
 
+// Create required directories if they don't exist
+const requiredDirs = [
+  path.join(distDir, 'server'),
+  path.join(distDir, 'shared')
+];
+
+for (const dir of requiredDirs) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
 try {
-  // Build TypeScript files to JavaScript
-  execSync('npx tsc --project tsconfig-backend.json', { 
+  console.log('Compiling TypeScript...');
+  const tsconfigPath = path.join(rootDir, 'tsconfig-backend.json');
+  console.log('Looking for tsconfig at:', tsconfigPath);
+  console.log('File exists:', fs.existsSync(tsconfigPath));
+  
+  execSync(`npx tsc --project "${tsconfigPath}"`, { 
     stdio: 'inherit',
     cwd: rootDir 
   });
@@ -57,6 +73,35 @@ try {
   }
   
   console.log('Backend build completed successfully!');
+  
+  // Fix ES module imports by adding .js extensions
+  console.log('Fixing ES module imports...');
+  const distServerDir = path.join(rootDir, 'dist', 'server');
+  const files = fs.readdirSync(distServerDir).filter(f => f.endsWith('.js'));
+  
+  for (const file of files) {
+    const filePath = path.join(distServerDir, file);
+    let content = fs.readFileSync(filePath, 'utf8');
+    
+    // Fix relative imports without extensions
+    content = content.replace(/from\s+["']\.\/([^"']+)["']/g, (match, p1) => {
+      if (!p1.endsWith('.js')) {
+        return `from "./${p1}.js"`;
+      }
+      return match;
+    });
+    
+    content = content.replace(/from\s+["']\.\.\/([^"']+)["']/g, (match, p1) => {
+      if (!p1.endsWith('.js')) {
+        return `from "../${p1}.js"`;
+      }
+      return match;
+    });
+    
+    fs.writeFileSync(filePath, content);
+  }
+  
+  console.log('ES module imports fixed!');
   
 } catch (error) {
   console.error('Build failed:', error);

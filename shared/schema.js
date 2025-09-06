@@ -1,6 +1,10 @@
+// Zod tip çıkarımı için ReturnType<typeof schema['parse']> kullanılacak
+// import type { z } from "zod"; satırı kaldırıldı
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+// Zod tip çıkarımı için ReturnType<typeof schema['parse']> kullanılacak
+// z.infer kullanılacak, ek import gerekmez
 export const settings = pgTable("settings", {
     id: serial("id").primaryKey(),
     siteTitle: text("site_title"),
@@ -120,3 +124,4 @@ export const insertContactSchema = createInsertSchema(contacts).omit({
 export const insertAdminSchema = createInsertSchema(admins).omit({
     id: true,
 });
+//# sourceMappingURL=schema.js.map
