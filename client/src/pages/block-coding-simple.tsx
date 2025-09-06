@@ -93,18 +93,10 @@ const BlockCodingPage = () => {
             <Button 
               variant="outline" 
               onClick={() => {
-                try {
-                  // Open the CLK Block Code HTML file directly in the browser
-                  const blockCodePath = 'file:///C:/Users/clk/Desktop/github%20proje/clktech/CLK%20Block%20code/index.html';
-                  window.open(blockCodePath, '_blank');
-                } catch (error) {
-                  console.error('Sayfa açılırken hata oluştu:', error);
-                  toast({
-                    title: 'Hata',
-                    description: 'Blok kodlama sayfası açılamadı. Lütfen uygulamanın doğru konumda olduğundan emin olun.',
-                    variant: 'destructive',
-                  });
-                }
+                toast({
+                  title: 'Bilgi',
+                  description: 'Blok kodlama uygulaması yakında eklenecek!',
+                });
               }}
             >
               Uygulamayı Aç
